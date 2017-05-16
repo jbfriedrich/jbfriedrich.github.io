@@ -1,0 +1,23 @@
+---
+layout: home
+---
+
+<section class="hero">
+
+  <div class="hero-inner container">
+
+    <img src="{{ site.author.thumb | prepend: site.baseurl }}" alt="author thumb" class="dot">
+    <h1>Hello!..</h1>
+    <h3>I'm <strong itemprop="name">{{ site.author.name }}</strong>, a <em itemprop="jobTitle">{{ site.author.job }}</em>.</h3>
+    <h3>{{ site.author.bio }}</h3>
+
+    <a href="http://jason.friedrich.uk" class="btn btn-ghost">Resume</a>
+    <a href="https://jason.re" class="btn btn-ghost">Blog</a>
+    <a href="https://virtualizethis.blog" class="btn btn-ghost">Virtualization</a>
+    <a href="https://keybase.io/jbfriedrich" class="btn btn-ghost">Keybase.io</a>
+
+    {% include social.html %}
+
+  </div>
+
+</section>
