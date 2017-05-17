@@ -43,11 +43,9 @@ author:
   linkedin  : https://www.linkedin.com/in/jbfriedrich
 
 # navbar pages
-navbar:
-  - slug: about
-    title: About
-  - slug: fickdich
-    title: Fick Dich
+#navbar:
+  #- slug: about
+  #  title: About
   # - slug: resume
   #   title: Resume
   # - slug: skills
