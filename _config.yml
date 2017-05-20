@@ -30,10 +30,8 @@ baseurl: ""
 # Author settings
 author:
   name      : Jason Friedrich
-  job       : DevOps Engineer
-  bio       : "Just another left-handed, binge-watching, tech geek from Bochum
-               who enjoys drinking coffee, playing video games and writing on
-               the Internet."
+  job       : Systems Automation Engineer
+  bio       : "Just another left-handed, binge-watching, tech geek who enjoys drinking coffee, playing video games and writing on the Internet."
   thumb     : /images/author.png
   email     : contact@friedrich.uk
   url       : http://friedrich.uk
