@@ -31,10 +31,10 @@ baseurl: ""
 author:
   name      : Jason Friedrich
   job       : Systems Engineer
-  bio       : "I am just another left-handed, binge-watching, tech geek who enjoys drinking coffee, playing video games, writing on the Internet and building automated castles in the clouds."
+  bio       : "I am just another left-handed, binge-watching, tech geek who enjoys drinking coffee, playing video games and writing on the Internet. I am building automated <i>castles in the cloud</i> for a living."
   thumb     : /images/author.png
   email     : contact@friedrich.uk
-  url       : http://friedrich.uk
+  url       : https://friedrich.uk
   github    : https://github.com/jbfriedrich
   twitter   : https://twitter.com/jbfriedrich
   #facebook  : http://facebook.com/fernando.dev
