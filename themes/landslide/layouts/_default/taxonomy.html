@@ -1,0 +1,16 @@
+{{ define "title" }}
+    {{ .Site.Title }}
+{{ end }}
+{{ define "main" }}
+    <div class="posts wrapper43">
+        <h1 class="tag-section"><i class="bi bi-tag tag-section-icon"></i> {{ .Name | title }}</h1>
+        {{ range .Pages.GroupByDate "2006" }}
+            <h2 class="post-year">{{ .Key }}</h2>
+            <div class="post-list">
+            {{ range .Pages }}
+                {{ partial "post_list_items.html" . }}
+            {{ end }}
+            </div>
+        {{ end }}
+    </div>
+{{ end }}

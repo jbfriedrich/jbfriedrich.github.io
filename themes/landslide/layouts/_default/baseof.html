@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dar">
+  <head>
+      <title>{{ .Site.Title }}</title>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="HandheldFriendly" content="True" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      {{ with .Site.Params.description -}}
+      <meta name="description" content="{{ . }}">
+      {{- else -}}
+      <meta name="description" content="{{ .Site.Title }}">
+      {{- end }}
+      {{ with .Site.Params.author.display_name }}<meta name="author" content="{{ . }}">{{ end -}}
+      {{/*  {{ with .Site.Params.keywords }}<meta name="keywords" content="{{ . }}">{{ end }}  */}}
+      {{- template "_internal/twitter_cards.html" . -}}
+      {{- template "_internal/opengraph.html" . -}}
+      <link href="/css/outpput.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+      {{/*  <link href="/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">  */}}
+      {{/*  <script src="/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>  */}}
+      {{/*  <script src="/js/toggle.min.js"></script>  */}}
+      <link href="/css/bootstrap-icons.min.css" rel="stylesheet" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
+      <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+      <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+      <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+      <link rel="manifest" href="/site.webmanifest">
+  </head>
+  <body id="top" class="main container">
+    <header class="header text-center py-5 bg-inf">
+      <div class="header-logo pb-4">
+        {{ $img := resources.Get "images/author.png" }}
+        {{ with $img }}
+          {{ $regular := .Resize "122x" }}
+          {{ $double := .Resize "244x" }}
+          <img class="logo rounded-circle border border-3" title="About" srcset="{{ $regular.RelPermalink }}, {{ $double.RelPermalink }} 2x" alt="Blog Logo" src="{{ $double.RelPermalink }}">
+        {{ end }}
+      </div>
+      <h1 class="blog-title m-1">{{ .Site.Title }}</h1>
+      <h2 class="blog-subtitle mb-3">{{ .Site.Params.subtitle }}</h2>
+      <h3 class="blog-subtitle pt-5 pb-3">{{ .Site.Params.greeting }}</h3>
+      <div class="header-text d-flex flex-sm-row justify-content-center">
+        <div class="description lead w-75">{{ .Site.Params.tagline }}</div>
+      </div>
+    </header>
+
+    <main class="content">
+      {{- block "main" . -}}{{- end -}}
+    </main>
+    <div class="footer-text d-flex justify-content-between pt-5 pb-2 px-2">
+      <div class="notice">{{ .Site.Params.copyright }}</div>      
+      <a class="goto-top d-block" title="Top " href="#top">&#8593; Top &#8593;</a>
+    </div>
+  </body>
+</html>

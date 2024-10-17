@@ -1,0 +1,75 @@
+title: "Jason Friedrich"
+baseURL: "https://friedrich.uk"
+languageCode: "en-us"
+timeZone: Europe/Berlin
+theme: "landslide"
+#publishDir: docs
+summaryLength: 50
+paginate: 12
+canonifyURLs: false
+footnoteReturnLinkContents: "↩"
+plainIDAnchors: true
+autolink: false
+assetDir: "static"
+
+frontmatter:
+  date:
+    - "date"
+    - "lastmod"
+    - "publishDate"
+    - ":filename"
+  publishDate:
+    - "publishDate"
+    - "date"
+  lastmod:
+    - "lastmod"
+    - ":fileModTime"
+    - "publishDate"
+    - "date"
+
+markup:
+  goldmark:
+    renderer:
+      hardWraps: true
+      unsafe: true
+
+params:
+  author:
+    given_name: "Jason"
+    family_name: "Friedrich"
+    display_name: "Jason Friedrich"
+    thumbnail: "https://www.gravatar.com/avatar/3c4b5f09f9e988618881f349516028ab"
+    image: "https://www.gravatar.com/avatar/3c4b5f09f9e988618881f349516028ab?s=250&d=mm&r=x"
+    website: "https://friedrich.uk"
+  copyright: © 2024 Jason Friedrich
+  friendly_url: friedrich.uk
+  greeting: "Hello!.."
+  subtitle: "Websites, projects & social media"
+  tagline: "I am just another left-handed, binge-watching, tech-loving geriatric millenial, who enjoys drinking coffee and playing video games. I am a wannabe writer and a compendium of useless movie and tv show facts. I yell at clouds for a living."
+
+disableKinds:
+  - 'RSS'
+
+privacy:
+  googleAnalytics:
+    anonymizeIP: true
+    disable: false
+    respectDoNotTrack: true
+    useSessionStorage: true
+  instagram:
+    disable: false
+    simple: false
+  twitter:
+    disable: false
+    enableDNT: true
+    simple: false
+    disableInlineCSS: true
+  vimeo:
+    disable: false
+    simple: false
+  youtube:
+    disable: false
+    privacyEnhanced: true
+
+ignoreErrors: error-remote-getjson
+include: [".well-known"]

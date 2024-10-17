@@ -1,0 +1,16 @@
+{{ define "title" }}
+    {{ if eq .Page.Section "status" }}
+        {{ htmlUnescape .Page.Summary | truncate 60 }} | {{ .Site.Title }}
+    {{ else }}
+        {{ .Title }} | {{ .Site.Title }}
+    {{ end }}
+{{ end }}
+{{ define "main" }}
+    {{ if eq .Page.Section "status" }}
+        {{ partial "micro.html" . }}
+    {{ else if eq .Page.Section "posts" }}
+        {{ partial "post.html" . }}  
+    {{ else }}
+        {{ partial "page.html" . }}
+    {{ end }}
+{{ end }}

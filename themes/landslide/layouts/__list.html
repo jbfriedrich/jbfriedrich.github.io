@@ -1,0 +1,15 @@
+{{ define "title" }}
+    {{ .Site.Title }}
+{{ end }}
+{{ define "main" }}
+    <div class="posts wrapper43">
+        {{ range (.Paginate ( where .Site.RegularPages "Type" "in" site.Params.mainSections)).Pages.GroupByDate "2006" }}
+            <h2 class="post-year">{{ .Key }}</h2>
+            <div class="post-list">
+            {{ range .Pages }}
+                {{ partial "post_list_items.html" . }}
+            {{ end }}
+            </div>
+        {{ end }}
+    </div>
+{{ end }}
