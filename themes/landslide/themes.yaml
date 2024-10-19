@@ -1,0 +1,12 @@
+name: "Landslide"
+license: "MIT"
+licenselink: "https://github.com/jbfriedrich/landslide"
+description: "Simple landing page theme for Hugo"
+homepage: "https://github.com/jbfriedrich/landslide"
+tags: ["personal"]
+features: ["Bootstrap Icons", "Bootstrap", "Favicon", "Twitter card", "Opengraph", "Dark Mode", "Sitemap"]
+min_version: "0.41"
+
+author:
+  name: "Jason Friedrich"
+  homepage: "https://friedrich.uk"
