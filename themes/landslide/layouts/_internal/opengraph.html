@@ -1,5 +1,5 @@
 <meta property="og:title" content="{{ .Title }}" />
-<meta property="og:description" content="{{ with .Site.Params.subtitle }}" />
+<meta property="og:description" content="{{ .Site.Params.subtitle }}" />
 <meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}" />
 <meta property="og:url" content="{{ .Permalink }}" />
 {{- with $.Params.images -}}
