@@ -38,8 +38,7 @@ params:
     given_name: "Jason"
     family_name: "Friedrich"
     display_name: "Jason Friedrich"
-    thumbnail: "https://www.gravatar.com/avatar/3c4b5f09f9e988618881f349516028ab"
-    image: "https://www.gravatar.com/avatar/3c4b5f09f9e988618881f349516028ab?s=250&d=mm&r=x"
+    image: "https://friedrich.uk/images/author.png"
     website: "https://friedrich.uk"
   friendly_url: friedrich.uk
   greeting: "Hello!.."
