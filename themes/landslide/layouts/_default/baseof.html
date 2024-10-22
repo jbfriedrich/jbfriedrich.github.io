@@ -14,14 +14,14 @@
       {{ with .Site.Params.author.display_name }}<meta name="author" content="{{ . }}">{{ end -}}
       {{- template "_internal/twitter_cards.html" . -}}
       {{- template "_internal/opengraph.html" . -}}
-      <link href="/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-      <script src="/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-      <script src="/js/toggle.min.js" defer></script>
-      <link href="/css/bootstrap-icons.min.css" rel="stylesheet" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
+      <link href="/css/bootstrap.min.css" rel="stylesheet" rel="preload" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+      <link href="/css/bootstrap-icons.min.css" rel="stylesheet" rel="preload" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
       <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
       <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
       <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
       <link rel="manifest" href="/site.webmanifest">
+      <script src="/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
+      <script src="/js/toggle.min.js" defer></script>
   </head>
   <body id="top" class="main container">
     <header class="header text-center py-5 bg-inf">
