@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en" data-bs-theme="dark" class="h-100">
   <head>
       <title>{{ .Site.Title }}</title>
       <meta charset="utf-8">
@@ -23,7 +23,7 @@
       <script src="/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
       <script src="/js/toggle.min.js" defer></script>
   </head>
-  <body id="top" class="main container">
+  <body id="top" class="main container h-100">
     <header class="header text-center py-5 bg-inf">
       {{ $img := resources.Get "images/author.png" }}
       {{ with $img }}
