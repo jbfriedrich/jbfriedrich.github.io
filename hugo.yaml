@@ -41,9 +41,9 @@ params:
     image: "https://friedrich.uk/images/author.png"
     website: "https://friedrich.uk"
   friendly_url: friedrich.uk
-  greeting: "Hello!.."
+  greeting: "Hello!…"
   subtitle: "Websites, projects & social media"
-  tagline: "… my name is Jason and I am just another left-handed, binge-watching, tech-loving geriatric millenial, who enjoys drinking coffee and playing video games. I am a wannabe writer and a compendium of useless movie and tv show facts. I yell at clouds for a living."
+  tagline: "I am just another left-handed, binge-watching, tech-loving geriatric millenial, who enjoys drinking coffee and playing video games. I am a wannabe writer and a compendium of useless movie and tv show facts. I yell at clouds for a living."
 
 disableKinds:
   - 'RSS'
