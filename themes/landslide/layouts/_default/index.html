@@ -14,7 +14,7 @@
         <div class="card-body">
             {{ range sort $links "name" }}
             <div class="link-entry p-2">
-                <i class="bi bi-{{ .icon }}"></i> <a class="link-body-emphasis link-underline-opacity-0 link-offset-3 link-underline-opacity-100-hover" href="{{ .url }}">{{ .name }}</a>
+                <i class="{{ .icon }}"></i> <a class="link-body-emphasis link-underline-opacity-0 link-offset-3 link-underline-opacity-100-hover" href="{{ .url }}">{{ .name }}</a>
             </div>
             {{ end }}
         </div>

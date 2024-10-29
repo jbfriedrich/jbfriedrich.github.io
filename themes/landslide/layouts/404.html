@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en" data-bs-theme="dark" class="h-100">
   <head>
       <title>{{ .Site.Title }}</title>
       <meta charset="utf-8">
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
       <meta name="HandheldFriendly" content="True" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+      <meta name="theme-color" content="#212529" media="(prefers-color-scheme: dark)">
+      <meta name="theme-color" content="#fff" media="(prefers-color-scheme: light)">
       {{ with .Site.Params.description -}}
       <meta name="description" content="{{ . }}">
       {{- else -}}
@@ -14,17 +16,17 @@
       {{ with .Site.Params.author.display_name }}<meta name="author" content="{{ . }}">{{ end -}}
       {{- template "_internal/twitter_cards.html" . -}}
       {{- template "_internal/opengraph.html" . -}}
-      <link href="/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-      <script src="/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-      <script src="/js/toggle.min.js" defer></script>
-      <link href="/css/bootstrap-icons.min.css" rel="stylesheet" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
+      <link href="/css/bootstrap.min.css" rel="stylesheet" rel="preload" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
       <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
       <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
       <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
       <link rel="manifest" href="/site.webmanifest">
+      <script src="/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
+      <script src="https://kit.fontawesome.com/8e970ba8ec.js" crossorigin="anonymous"></script>
+      <script src="/js/toggle.min.js" defer></script>
   </head>
-  <body id="top" class="main container">
-    <header class="header text-center pt-5 bg-inf">
+  <body id="top" class="main container h-100">
+    <header class="header text-center py-5 bg-inf">
       {{ $img := resources.Get "images/author.png" }}
       {{ with $img }}
         {{ $regular := .Resize "122x" }}
@@ -43,8 +45,8 @@
     </main>
     <div class="footer-text d-flex justify-content-between py-5 px-2">
       <div class="notice d-none d-sm-block"><span style="color: var(--bs-code-color)">&copy; </span>{{ time.Now.Year }} {{ .Site.Params.author.display_name }}</div>
-      <div class="email"><i class="bi bi-envelope-at" style="color: var(--bs-code-color)"></i> hello@friedrich<b class="d-none">.friedrich</b>.uk</div>
-      <button type="button" data-theme-toggle class="btn py-0" aria-label="Light" style="--bs-btn-hover-border-color:var(--bs-code-color)"><i id="icon-theme-toggle" aria-hidden="true" class="bi bi-sun" style="color: var(--bs-code-color)"></i>&nbsp;<span>Light</span></button>
+      <div class="email"><i class="fa-regular fa-envelope" style="color: var(--bs-code-color)"></i> hello@friedrich<b class="d-none">.friedrich</b>.uk</div>
+      <button type="button" data-theme-toggle class="btn py-0" aria-label="Light" style="--bs-btn-hover-border-color:var(--bs-code-color)"><i id="icon-theme-toggle" aria-hidden="true" class="fa-regular fa-sun" style="color: var(--bs-code-color)"></i>&nbsp;<span>Light</span></button>
     </div>
   </body>
 </html>

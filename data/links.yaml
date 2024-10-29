@@ -1,21 +1,21 @@
 social:
   - name: Mastodon
     url: https://click.ba.it/@jason
-    icon: mastodon
+    icon: fa-brands fa-mastodon
   - name: Bluesky
     url: https://bsky.app/profile/jason.re
-    icon: chat-left-dots
+    icon: fa-brands fa-bluesky
   - name: LinkedIn
     url: https://www.linkedin.com/in/jbfriedrich
-    icon: linkedin
+    icon: fa-brands fa-linkedin
   - name: Instagram
     url: https://www.instagram.com/jbf.png/
-    icon: instagram
+    icon: fa-brands fa-instagram
 development:
   - name: GitHub
     url: https://github.com/jbfriedrich
-    icon: github
+    icon: fa-brands fa-github
 blogs:
   - name: Thoughts, Links & Moods
     url: https://jason.re
-    icon: journal-text
+    icon: fa-solid fa-blog
