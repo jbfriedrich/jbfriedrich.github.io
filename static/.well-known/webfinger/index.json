@@ -19,6 +19,10 @@
         {
             "rel": "http://ostatus.org/schema/1.0/subscribe",
             "template": "https://click.ba.it/authorize_interaction?uri={uri}"
+        },
+        {
+            "href": "https://oauth.id.jumpcloud.com/",
+            "rel": "http://openid.net/specs/connect/1.0/issuer"
         }
     ]
 }
