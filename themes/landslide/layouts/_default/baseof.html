@@ -44,9 +44,9 @@
     <main class="content">
       {{- block "main" . -}}{{- end -}}
     </main>
-    <div class="footer-text d-flex justify-content-between py-5 px-2">
-      <div class="notice d-none d-sm-block"><span style="color: var(--bs-code-color)">&copy; </span>{{ time.Now.Year }} {{ .Site.Params.author.display_name }}</div>
-      <div class="email"><i class="fa-regular fa-envelope" style="color: var(--bs-code-color)"></i> hello@friedrich<b class="d-none">.friedrich</b>.uk</div>
+    <div class="footer-text d-flex text-secondary-emphasis justify-content-between py-5 px-2">
+      <div class="notice d-none d-sm-block">&copy; {{ time.Now.Year }} {{ .Site.Params.author.display_name }}</div>
+      <div class="email"><i class="fa-regular fa-envelope"></i> hello@friedrich<b class="d-none">.friedrich</b>.uk</div>
       <button type="button" data-theme-toggle class="btn py-0" aria-label="Light" style="--bs-btn-hover-border-color:var(--bs-code-color)"><i id="icon-theme-toggle" aria-hidden="true" class="fa-regular fa-sun" style="color: var(--bs-code-color)"></i>&nbsp;<span>Light</span></button>
     </div>
   </body>
