@@ -5,7 +5,7 @@ timeZone: Europe/Berlin
 theme: "landslide"
 #publishDir: docs
 summaryLength: 50
-paginate: 12
+pagination.pagerSize: 12
 canonifyURLs: false
 footnoteReturnLinkContents: "↩"
 plainIDAnchors: true
