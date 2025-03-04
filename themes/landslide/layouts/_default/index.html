@@ -1,25 +1,16 @@
 {{- define "main" -}}
-
 <div class="link-list d-flex justify-content-center align-items-center align-items-lg-stretch flex-column flex-lg-row gap-4 py-4">
 {{ range $category, $links := .Site.Data.links }}
-    {{ if eq $category "social" }}
-        {{ $.Scratch.Set "color" "success"}}
-    {{ else if eq $category "blogs" }}
-        {{ $.Scratch.Set "color" "primary" }}
-    {{ else if eq $category "development" }}
-        {{ $.Scratch.Set "color" "secondary" }}
-    {{ end }}
-    <div class="links {{ $category }}-links card text-center bg-{{ $.Scratch.Get "color" }}-subtle text-{{ $.Scratch.Get "color" }}-emphasis border-{{ $.Scratch.Get "color" }}-subtle flex-shrink-0 mb-3" style="width: 275px;">
+    <div class="links {{ $category }}-links card text-center flex-shrink-0 mb-3" style="width: 275px;">
         <div class="card-header fs-5 fw-bold">{{ $category | title }}</div>
         <div class="card-body">
             {{ range sort $links "name" }}
             <div class="link-entry p-2">
-                <i class="{{ .icon }}"></i> <a class="link-body-emphasis link-underline-opacity-0 link-offset-3 link-underline-opacity-100-hover" href="{{ .url }}">{{ .name }}</a>
+                <i class="{{ .icon }}" style="color: var(--bs-code-color);"></i> <a class="link-body-emphasis link-underline-opacity-0 link-offset-3 link-underline-opacity-100-hover" href="{{ .url }}">{{ .name }}</a>
             </div>
             {{ end }}
         </div>
     </div>
 {{ end }}
 </div>
-
 {{- end -}}
