@@ -29,7 +29,6 @@
   </style>
   <script src="/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
   <script src="https://kit.fontawesome.com/8e970ba8ec.js" crossorigin="anonymous"></script>
-  <script src="/js/toggle.min.js" defer></script>
 </head>
 <body id="top" class="main container h-100">
   <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
@@ -126,43 +125,43 @@
     <div class="tagline row justify-content-md-center">
       <div class="tagline-text lead col-12 col-md-10 col-lg-9 col-xl-8">{{ .Site.Params.tagline }}</div>
     </div>
+  </header>
+  <main class="content">
+    {{- block "main" . -}}{{- end -}}
+  </main>
+  <div class="footer-text d-flex text-secondary-emphasis justify-content-between py-5 px-2">
+    <div class="notice text- d-none d-sm-block"><span style="color: var(--bs-code-color);">&copy; </span>{{ time.Now.Year }} {{ .Site.Params.author.display_name }}</div>
+    <div class="email"><i class="fa-regular fa-envelope" style="color: var(--bs-code-color);"></i> hello@friedrich<b class="d-none">.friedrich</b>.uk</div>
+    <div class="dropup bd-mode-toggle">
+      <button class="btn btn-secondary py-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" aria-label="Toggle theme (auto)">
+        <svg class="bi my-1 theme-icon-active" width="1em" height="1em"><use href="#circle-half"></use></svg>
+        <span class="visually-hidden" id="bd-theme-text">Toggle theme</span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="bd-theme-text">
+        <li>
+          <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="false">
+            <svg class="bi me-2 opacity-50" width="1em" height="1em"><use href="#sun-fill"></use></svg>
+            Light
+            <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="#check2"></use></svg>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="false">
+            <svg class="bi me-2 opacity-50" width="1em" height="1em"><use href="#moon-stars-fill"></use></svg>
+            Dark
+            <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="#check2"></use></svg>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto" aria-pressed="true">
+            <svg class="bi me-2 opacity-50" width="1em" height="1em"><use href="#circle-half"></use></svg>
+            Auto
+            <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="#check2"></use></svg>
+          </button>
+        </li>
+      </ul>
+    </div>
   </div>
-</header>
-<main class="content">
-  {{- block "main" . -}}{{- end -}}
-</main>
-<div class="footer-text d-flex text-secondary-emphasis justify-content-between py-5 px-2">
-  <div class="notice text- d-none d-sm-block"><span style="color: var(--bs-code-color);">&copy; </span>{{ time.Now.Year }} {{ .Site.Params.author.display_name }}</div>
-  <div class="email"><i class="fa-regular fa-envelope" style="color: var(--bs-code-color);"></i> hello@friedrich<b class="d-none">.friedrich</b>.uk</div>
-  <div class="dropup bd-mode-toggle">
-    <button class="btn btn-secondary py-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" aria-label="Toggle theme (auto)">
-      <svg class="bi my-1 theme-icon-active" width="1em" height="1em"><use href="#circle-half"></use></svg>
-      <span class="visually-hidden" id="bd-theme-text">Toggle theme</span>
-    </button>
-    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="bd-theme-text">
-      <li>
-        <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="false">
-          <svg class="bi me-2 opacity-50" width="1em" height="1em"><use href="#sun-fill"></use></svg>
-          Light
-          <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="#check2"></use></svg>
-        </button>
-      </li>
-      <li>
-        <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="false">
-          <svg class="bi me-2 opacity-50" width="1em" height="1em"><use href="#moon-stars-fill"></use></svg>
-          Dark
-          <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="#check2"></use></svg>
-        </button>
-      </li>
-      <li>
-        <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto" aria-pressed="true">
-          <svg class="bi me-2 opacity-50" width="1em" height="1em"><use href="#circle-half"></use></svg>
-          Auto
-          <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="#check2"></use></svg>
-        </button>
-      </li>
-    </ul>
-  </div>
-</div>
+  <script src="/js/toggle.min.js" defer></script>
 </body>
 </html>
