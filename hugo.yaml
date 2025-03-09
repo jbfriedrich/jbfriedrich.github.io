@@ -38,12 +38,12 @@ params:
     given_name: "Jason"
     family_name: "Friedrich"
     display_name: "Jason Friedrich"
-    image: "https://friedrich.uk/images/author.png"
+    image: "https://friedrich.uk/images/author_hu13833370196816603037.jpg"
     website: "https://friedrich.uk"
   friendly_url: friedrich.uk
   greeting: "Hello!…"
   subtitle: "Websites, projects & social media"
-  tagline: "I am just another left-handed, binge-watching, tech-loving geriatric millenial who enjoys drinking coffee and playing video games. I am an amateur wordsmith who enjoys weaving short little stories – and a walking compendium of useless movie & tv show facts. I work in IT and yell at clouds for a living."
+  tagline: "I'm Jason – lefty, tech nerd, movie trivia hoarder, and IT professional (i.e.: I shake my fist at the sky and yell at Clouds for a living!). I write, I game, I consume way too much TV, and I function exclusively on coffee."
 disableKinds:
   - 'RSS'
   - 'sitemap'
