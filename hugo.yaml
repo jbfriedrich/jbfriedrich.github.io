@@ -43,7 +43,7 @@ params:
   friendly_url: friedrich.uk
   greeting: "Hello!…"
   subtitle: "Websites, projects & social media"
-  tagline: "… I'm Jason – lefty, tech nerd, movie trivia hoarder, and IT professional (read: I shake my fist at the sky and yell at Clouds for a living!). I write, I game, I consume way too much TV, and I function exclusively on coffee."
+  tagline: "… I'm Jason – lefty, tech nerd, movie trivia hoarder, and IT professional (read: I shake my fist at the sky and yell at Clouds for a living!). I write, I game, I consume way too much TV, and I function exclusively on coffee and Coke Zero."
 disableKinds:
   - 'RSS'
   - 'sitemap'
