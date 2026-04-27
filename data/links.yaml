@@ -2,9 +2,6 @@ social:
   - name: Mastodon
     url: https://click.ba.it/@jason
     icon: fa-brands fa-mastodon
-  - name: Bluesky
-    url: https://bsky.app/profile/jason.re
-    icon: fa-brands fa-bluesky
   - name: LinkedIn
     url: https://www.linkedin.com/in/jbfriedrich
     icon: fa-brands fa-linkedin
@@ -19,3 +16,6 @@ blogs:
   - name: Thoughts, Links & Moods
     url: https://jason.re
     icon: fa-solid fa-blog
+  - name: Statuslog
+    url: https://status.jason.re
+    icon: fa-solid fa-note-sticky
