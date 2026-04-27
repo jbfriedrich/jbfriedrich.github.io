@@ -16,6 +16,8 @@ blogs:
   - name: Thoughts, Links & Moods
     url: https://jason.re
     icon: fa-solid fa-blog
+    weight: 10
   - name: Statuslog
     url: https://status.jason.re
-    icon: fa-solid fa-note-sticky
+    icon: fa-regular fa-note-sticky
+    weight: 20
