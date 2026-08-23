@@ -1,0 +1,35 @@
+{{- /*
+  Safely coerce a raw unmarshalled XML value into a plain string.
+
+  Hugo's XML unmarshal shape depends on what the source feed actually
+  emits, not on the tag name alone:
+    - a bare element ("<title>Foo</title>")              -> string
+    - an element carrying an attribute ("<title type=…>") -> map, with the
+      element's own text under the "#text" key and each attribute under a
+      "-name" key
+    - an element that repeats                             -> slice
+  Every raw field read in normalise.html is a raw XML value of exactly this
+  kind, so this is a shared choke point, not a per-branch concern — the
+  same reasoning as safedate.html's for time values. Without it, `string`
+  or `index … "#text"` panics the whole build the moment a source emits
+  the shape the caller didn't expect (a WordPress/Blogger `type=` on an
+  Atom <title>, a bare Atom <content> with no type=, an RSS <category
+  domain=…>, …).
+
+  Params:
+    .value — the raw unmarshalled value: nil, a string, a map, or a slice
+
+  Returns: a plain string ("" if nothing sensible can be extracted)
+*/ -}}
+{{- $v := .value -}}
+{{- $out := "" -}}
+{{- if reflect.IsSlice $v -}}
+  {{- if gt (len $v) 0 -}}
+    {{- $out = partial "rawstring.html" (dict "value" (index $v 0)) -}}
+  {{- end -}}
+{{- else if reflect.IsMap $v -}}
+  {{- $out = string (index $v "#text" | default "") -}}
+{{- else -}}
+  {{- $out = string ($v | default "") -}}
+{{- end -}}
+{{- return $out -}}

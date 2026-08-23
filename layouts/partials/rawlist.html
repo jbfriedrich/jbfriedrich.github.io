@@ -1,0 +1,27 @@
+{{- /*
+  Safely coerce a raw unmarshalled XML collection into a slice.
+
+  Hugo's XML unmarshal returns a bare map when a repeating element (e.g.
+  <entry>, <item>, <link>, <category>) appears exactly once in the source,
+  and a slice only when it appears more than once. `range` over a map
+  iterates its *values*, so ranging an un-coerced single-item collection
+  reaches field access (e.g. $e.link) on the wrong shape and panics the
+  whole build — a newly created section, a purged Mastodon account, or a
+  one-book shelf all trigger this. Every collection walked in
+  normalise.html needs "always a slice" before ranging; this is that
+  shared choke point, the same reasoning as safedate.html's for time
+  values.
+
+  Params:
+    .value — the raw unmarshalled value: nil, a map, or a slice
+
+  Returns: a slice (empty if .value is nil)
+*/ -}}
+{{- $v := .value | default slice -}}
+{{- $out := slice -}}
+{{- if reflect.IsSlice $v -}}
+  {{- $out = $v -}}
+{{- else -}}
+  {{- $out = slice $v -}}
+{{- end -}}
+{{- return $out -}}

@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="en">
+<head>{{ partial "head.html" . }}</head>
+<body>
+  {{ partial "hero.html" . }}
+  {{ partial (printf "presets/%s.html" .Site.Params.preset) . }}
+  {{ partial "footer.html" . }}
+</body>
+</html>

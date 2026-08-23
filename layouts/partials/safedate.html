@@ -1,0 +1,40 @@
+{{- /*
+  Safely parse a feed-supplied date string into a time.Time.
+
+  A failing source must never fail the build, and time.AsTime panics the
+  whole render on an empty or malformed input — every branch of
+  normalise.html feeds it a raw string straight from XML, so this is a
+  shared choke point, not a per-branch concern.
+
+  We do not fabricate a date: an item that cannot be dated is skipped
+  ("ok" false) rather than shown with a wrong or invented date, which
+  would silently misorder a card.
+
+  Params:
+    .value — raw date string, may be empty or malformed
+    .src   — source key, for the warnf when something is dropped
+    .title — item title, for the warnf when something is dropped
+
+  Returns: dict "ok" bool "date" (time.Time or nil)
+*/ -}}
+{{- $raw := string (.value | default "") -}}
+{{- $src := .src | default "" -}}
+{{- $title := .title | default "" -}}
+{{- $out := dict "ok" false "date" nil -}}
+
+{{- if not $raw -}}
+  {{- warnf "friedrich: source %q item %q has no date; skipping" $src $title -}}
+{{- else -}}
+  {{/* some feeds (Goodreads) give a single-digit day with no leading zero
+       ("Wed, 1 Feb 2023 …"), which time.AsTime cannot parse */}}
+  {{- $padded := replaceRE `^([A-Za-z]{3}, )(\d)( )` `${1}0${2}${3}` $raw -}}
+  {{- with try (time.AsTime $padded) -}}
+    {{- with .Err -}}
+      {{- warnf "friedrich: source %q item %q has unparsable date %q: %s; skipping" $src $title $raw . -}}
+    {{- else -}}
+      {{- $out = dict "ok" true "date" .Value -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- return $out -}}

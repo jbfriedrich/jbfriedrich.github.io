@@ -1,0 +1,27 @@
+{{- $src := .src -}}
+{{- $r := partial "source.html" (dict "src" $src) -}}
+{{- $items := slice -}}
+{{- if $r.ok -}}
+  {{- $all := partial "normalise.html" (dict "src" $src "data" $r.data) -}}
+
+  {{/* Take a wider slice first: filtering after the cut can empty the tile. */}}
+  {{- $window := int ($src.overfetch | default $src.count) -}}
+  {{- $all = first $window $all -}}
+
+  {{- $kept := slice -}}
+  {{- range $it := $all -}}
+    {{- $drop := false -}}
+    {{/* .summary is truncated for display, but it is also matched here,
+         so it is never fully "dead" even for sources that never render
+         it (e.g. Mastodon posts that merely cross-post from asides.blog) */}}
+    {{- range $pat := ($src.excludes | default slice) -}}
+      {{- if or (in $it.url $pat) (in $it.summary $pat) -}}
+        {{- $drop = true -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if not $drop -}}{{- $kept = $kept | append $it -}}{{- end -}}
+  {{- end -}}
+
+  {{- $items = first (int $src.count) $kept -}}
+{{- end -}}
+{{- return dict "ok" $r.ok "items" $items -}}

@@ -1,4 +1,7 @@
-.DS_Store
-public
+bin/
+public/
+public_test/
+public_signal/
+resources/
 .hugo_build.lock
-resources
+.DS_Store

@@ -1,0 +1,28 @@
+<button id="theme-toggle" type="button" aria-label="Switch colour theme">
+  <span data-theme-label>Auto</span>
+</button>
+<script>
+  (function () {
+    var modes = ["auto", "light", "dark"];
+    var btn = document.getElementById("theme-toggle");
+    var label = btn.querySelector("[data-theme-label]");
+    var cur = 0;
+    try {
+      var saved = localStorage.getItem("theme");
+      if (saved) { cur = modes.indexOf(saved); if (cur < 0) cur = 0; }
+    } catch (e) {}
+    function paint() {
+      var m = modes[cur];
+      if (m === "auto") {
+        document.documentElement.removeAttribute("data-theme");
+        try { localStorage.removeItem("theme"); } catch (e) {}
+      } else {
+        document.documentElement.setAttribute("data-theme", m);
+        try { localStorage.setItem("theme", m); } catch (e) {}
+      }
+      label.textContent = m.charAt(0).toUpperCase() + m.slice(1);
+    }
+    btn.addEventListener("click", function () { cur = (cur + 1) % 3; paint(); });
+    paint();
+  })();
+</script>

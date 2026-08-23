@@ -1,0 +1,64 @@
+<main class="grid">
+  {{ range $src := .Site.Params.sources }}
+    {{ $r := partial "items.html" (dict "src" $src) }}
+    <section class="tile tile--{{ $src.hue }}{{ if $src.full }} tile--full{{ end }}"
+             data-source="{{ $src.key }}" data-ok="{{ $r.ok }}">
+      <a class="tile__hd" href="{{ $src.home }}">
+        <span class="pip"></span>
+        <span class="tile__k">{{ $src.label }}</span>
+        <span class="tile__src">{{ replaceRE `^https?://` "" $src.home }} ↗</span>
+      </a>
+      <div class="tile__body{{ if $src.full }} books{{ end }}">
+        {{ range $item := $r.items }}
+          {{ if $item.image }}
+            <a class="book" href="{{ .url }}">
+              {{ $cover := "" }}
+              {{ with try (resources.GetRemote .image) }}
+                {{ with .Err }}
+                  {{ warnf "friedrich: cover fetch failed: %s" . }}
+                {{ else with .Value }}
+                  {{/* A 200 response is not guaranteed to be an image (rate-limit
+                       / maintenance / error pages all serve 200): check the media
+                       type before ever calling .Resize, which panics on non-image
+                       resources and is only available for image resources. */}}
+                  {{ if eq .MediaType.MainType "image" }}
+                    {{ $res := . }}
+                    {{ $name := printf "/images/covers/%s.webp" (substr (md5 $item.image) 0 12) }}
+                    {{/* Even a resource that claims to be an image can be corrupt
+                         or truncated, so guard the resize/copy step too. */}}
+                    {{ with try (resources.Copy $name ($res.Resize "136x webp q80")) }}
+                      {{ with .Err }}
+                        {{ warnf "friedrich: cover resize/copy failed: %s" . }}
+                      {{ else with .Value }}
+                        {{ $cover = .RelPermalink }}
+                      {{ end }}
+                    {{ end }}
+                  {{ else }}
+                    {{ warnf "friedrich: cover is not an image (%s): %s" .MediaType.Type $item.image }}
+                  {{ end }}
+                {{ end }}
+              {{ end }}
+              {{ with $cover }}<img class="book__cover" src="{{ . }}" alt="" width="68" height="102">{{ end }}
+              <span class="book__meta">
+                <span class="book__t">{{ .title }}</span>
+                <span class="book__a">{{ .summary }}</span>
+                <span class="book__r" data-rating="{{ .rating }}">{{ strings.Repeat .rating "★" }}</span>
+              </span>
+            </a>
+          {{ else }}
+            <div class="item">
+              <a class="item__t" href="{{ .url }}">{{ .title }}</a>
+              <p class="item__m">
+                {{ with .host }}<span class="item__host">{{ . }}</span>{{ end }}
+                <span>{{ .date.Format "2 Jan 2006" }}</span>
+                {{ with .tags }}<span>{{ delimit (first 2 .) " · " }}</span>{{ end }}
+                {{ with .permalink }}<a class="item__note" href="{{ . }}">my note</a>{{ end }}
+              </p>
+            </div>
+          {{ end }}
+        {{ end }}
+      </div>
+      <p class="tile__ft"><a href="{{ $src.home }}">All {{ lower $src.label }} →</a></p>
+    </section>
+  {{ end }}
+</main>

@@ -1,0 +1,21 @@
+<header class="hero">
+  <img class="hero__av" src="/images/avatar.jpg" alt="{{ .Site.Params.author }}" width="116" height="116">
+  <div class="hero__who">
+    <h1 class="hero__name">{{ .Site.Params.author }}</h1>
+    <p class="hero__bio">{{ .Site.Params.bio }}</p>
+    <nav class="hero__links">
+      {{ range .Site.Params.links }}
+        <a href="{{ .url }}"{{ if .me }} rel="me"{{ end }}>{{ .label }}</a>
+      {{ end }}
+    </nav>
+  </div>
+  {{- $ok := 0 -}}
+  {{- range $src := .Site.Params.sources -}}
+    {{- if (partial "source.html" (dict "src" $src)).ok -}}{{- $ok = add $ok 1 -}}{{- end -}}
+  {{- end -}}
+  <div class="hero__status">
+    {{ $ok }}/{{ len .Site.Params.sources }} sources<br>
+    rebuilt {{ now.Format "15:04" }}
+    {{ partial "theme-toggle.html" . }}
+  </div>
+</header>

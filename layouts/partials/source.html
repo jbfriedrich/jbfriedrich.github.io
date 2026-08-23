@@ -1,0 +1,21 @@
+{{- $src := .src -}}
+{{- $out := dict "ok" false "data" nil -}}
+{{- with try (resources.GetRemote $src.feed) -}}
+  {{- with .Err -}}
+    {{- warnf "friedrich: source %q unreachable: %s" $src.key . -}}
+  {{- else -}}
+    {{/* a 404 returns NO error and a nil value — this branch is why */}}
+    {{- with .Value -}}
+      {{- with try (transform.Unmarshal .) -}}
+        {{- with .Err -}}
+          {{- warnf "friedrich: source %q did not parse: %s" $src.key . -}}
+        {{- else -}}
+          {{- $out = dict "ok" true "data" .Value -}}
+        {{- end -}}
+      {{- end -}}
+    {{- else -}}
+      {{- warnf "friedrich: source %q returned nothing (404?)" $src.key -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}

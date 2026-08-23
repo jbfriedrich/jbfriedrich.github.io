@@ -1,0 +1,92 @@
+baseURL = "https://friedrich.uk/"
+languageCode = "en-gb"
+title = "Jason Friedrich"
+disableKinds = ["taxonomy", "term", "section", "page", "RSS", "sitemap", "robotsTXT", "404"]
+
+[module]
+  [module.hugoVersion]
+    min = "0.141.0"
+
+[params]
+  author   = "Jason Friedrich"
+  email    = "hello@friedrich.uk"
+  tagline  = "Websites, projects & social media"
+  preset   = "channels"
+  mastodon = "https://click.ba.it/@jason"
+  fediverseCreator = "@jason@click.ba.it"
+  bio = "Lefty, tech nerd, movie trivia hoarder and IT professional — I specialise in shaking my fist at clouds for a living. Everything I publish, in one place."
+
+[caches.getresource]
+  dir    = ":cacheDir/:project"
+  maxAge = "55m"
+
+[[params.sources]]
+  key = "posts"
+  label = "Posts"
+  kind = "atom"
+  feed = "https://undertow.blog/posts/index.xml"
+  home = "https://undertow.blog/posts/"
+  count = 3
+  hue = "posts"
+
+[[params.sources]]
+  key = "links"
+  label = "Links"
+  kind = "atom"
+  feed = "https://undertow.blog/links/index.xml"
+  home = "https://undertow.blog/links/"
+  count = 3
+  hue = "links"
+
+[[params.sources]]
+  key = "notes"
+  label = "Notes"
+  kind = "atom"
+  feed = "https://undertow.blog/notes/index.xml"
+  home = "https://undertow.blog/notes/"
+  count = 3
+  hue = "notes"
+
+[[params.sources]]
+  key = "asides"
+  label = "Asides"
+  kind = "rss"
+  feed = "https://asides.blog/rss/"
+  home = "https://asides.blog/"
+  count = 3
+  hue = "asides"
+
+[[params.sources]]
+  key = "mastodon"
+  label = "Mastodon"
+  kind = "rss"
+  feed = "https://click.ba.it/@jason.rss"
+  home = "https://click.ba.it/@jason"
+  count = 3
+  overfetch = 25
+  excludes = ["asides.blog"]
+  hue = "masto"
+
+[[params.sources]]
+  key = "books"
+  label = "Books"
+  kind = "goodreads"
+  feed = "https://www.goodreads.com/review/list_rss/145074430?shelf=read"
+  home = "https://www.goodreads.com/jbfriedrich"
+  count = 3
+  hue = "books"
+  full = true
+
+[[params.links]]
+  label = "GitHub"
+  url = "https://github.com/jbfriedrich"
+[[params.links]]
+  label = "Mastodon"
+  url = "https://click.ba.it/@jason"
+  me = true
+[[params.links]]
+  label = "Instagram"
+  url = "https://www.instagram.com/jbf.png/"
+[[params.links]]
+  label = "LinkedIn"
+  url = "https://www.linkedin.com/in/jbfriedrich"

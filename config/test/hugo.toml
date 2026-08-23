@@ -1,0 +1,163 @@
+[caches.getresource]
+  maxAge = "0s"
+
+[[params.sources]]
+  key = "posts"
+  label = "Posts"
+  kind = "atom"
+  feed = "http://127.0.0.1:8099/posts.xml"
+  home = "https://undertow.blog/posts/"
+  count = 3
+  hue = "posts"
+
+[[params.sources]]
+  key = "links"
+  label = "Links"
+  kind = "atom"
+  feed = "http://127.0.0.1:8099/links.xml"
+  home = "https://undertow.blog/links/"
+  count = 3
+  hue = "links"
+
+[[params.sources]]
+  key = "notes"
+  label = "Notes"
+  kind = "atom"
+  feed = "http://127.0.0.1:8099/notes.xml"
+  home = "https://undertow.blog/notes/"
+  count = 3
+  hue = "notes"
+
+[[params.sources]]
+  key = "asides"
+  label = "Asides"
+  kind = "rss"
+  feed = "http://127.0.0.1:8099/asides.xml"
+  home = "https://asides.blog/"
+  count = 3
+  hue = "asides"
+
+[[params.sources]]
+  key = "mastodon"
+  label = "Mastodon"
+  kind = "rss"
+  feed = "http://127.0.0.1:8099/mastodon.xml"
+  home = "https://click.ba.it/@jason"
+  count = 3
+  overfetch = 25
+  excludes = ["asides.blog"]
+  hue = "masto"
+
+[[params.sources]]
+  key = "books"
+  label = "Books"
+  kind = "goodreads"
+  feed = "http://127.0.0.1:8099/books.xml"
+  home = "https://www.goodreads.com/jbfriedrich"
+  count = 3
+  hue = "books"
+  full = true
+
+[[params.sources]]
+  key = "hostile"
+  label = "Hostile"
+  kind = "goodreads"
+  feed = "http://127.0.0.1:8099/hostile.xml"        # item-level hostile data: empty/malformed dates, non-numeric rating
+  home = "https://www.goodreads.com/jbfriedrich"
+  count = 4
+  hue = "books"
+  full = true
+
+# item-level shape hostility — Hugo's XML unmarshal returns a map for a
+# single element and a slice for several; each of these must survive a
+# green build (final whole-branch review, C1 and C2)
+[[params.sources]]
+  key = "one_atom"
+  label = "One Atom"
+  kind = "atom"
+  feed = "http://127.0.0.1:8099/one-atom.xml"       # exactly 1 <entry>: map, not slice
+  home = "https://example.org/"
+  count = 3
+  hue = "posts"
+
+[[params.sources]]
+  key = "one_rss"
+  label = "One RSS"
+  kind = "rss"
+  feed = "http://127.0.0.1:8099/one-rss.xml"        # exactly 1 <item>: map, not slice
+  home = "https://example.org/"
+  count = 3
+  hue = "posts"
+
+[[params.sources]]
+  key = "one_goodreads"
+  label = "One Goodreads"
+  kind = "goodreads"
+  feed = "http://127.0.0.1:8099/one-goodreads.xml"  # a one-book shelf: exactly 1 <item>
+  home = "https://example.org/"
+  count = 3
+  hue = "books"
+
+[[params.sources]]
+  key = "atomquirks"
+  label = "Atom Quirks"
+  kind = "atom"
+  feed = "http://127.0.0.1:8099/atomquirks.xml"     # <title type=> and bare <content> (no type=)
+  home = "https://example.org/"
+  count = 3
+  hue = "posts"
+
+[[params.sources]]
+  key = "rssquirks"
+  label = "RSS Quirks"
+  kind = "rss"
+  feed = "http://127.0.0.1:8099/rssquirks.xml"      # <category domain=>, <link> and <title> with attributes
+  home = "https://example.org/"
+  count = 3
+  hue = "posts"
+
+[[params.sources]]
+  key = "goodreadsquirks"
+  label = "Goodreads Quirks"
+  kind = "goodreads"
+  feed = "http://127.0.0.1:8099/goodreadsquirks.xml" # <title>, <author_name>, <user_read_at> with attributes
+  home = "https://example.org/"
+  count = 3
+  hue = "books"
+
+[[params.sources]]
+  key = "bareattrs"
+  label = "Bare Attrs"
+  kind = "atom"
+  feed = "http://127.0.0.1:8099/bareattrs.xml"        # <link> with no href=, <category> with no term=: neither is a map
+  home = "https://example.org/"
+  count = 3
+  hue = "posts"
+
+# deliberate failures — the build must stay green
+[[params.sources]]
+  key = "gone"
+  label = "Gone"
+  kind = "atom"
+  feed = "http://127.0.0.1:8099/no-such-file.xml"   # 404: no error, nil value
+  home = "https://example.org/"
+  count = 3
+  hue = "posts"
+
+[[params.sources]]
+  key = "down"
+  label = "Down"
+  kind = "atom"
+  feed = "http://127.0.0.1:9/dead.xml"              # connection refused: try catches
+  home = "https://example.org/"
+  count = 3
+  hue = "posts"
+
+[[params.sources]]
+  key = "garbage"
+  label = "Garbage"
+  kind = "atom"
+  feed = "http://127.0.0.1:8099/malformed.xml"      # parses as HTML: unmarshal errors
+  home = "https://example.org/"
+  count = 3
+  hue = "posts"

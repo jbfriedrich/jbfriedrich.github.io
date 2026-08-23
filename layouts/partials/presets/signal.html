@@ -1,0 +1,19 @@
+<main class="board">
+  {{ range $src := .Site.Params.sources }}
+    {{ $r := partial "items.html" (dict "src" $src) }}
+    <section class="chan chan--{{ $src.hue }}" data-source="{{ $src.key }}" data-ok="{{ $r.ok }}">
+      <div class="chan__hd">
+        <span class="chan__dot"></span>
+        <span class="chan__nm">{{ $src.label }}</span>
+        <a class="chan__src" href="{{ $src.home }}">{{ replaceRE `^https?://` "" $src.home }}</a>
+      </div>
+      {{ range $r.items }}
+        <a class="row" href="{{ .url }}">
+          <span class="row__d">{{ .date.Format "2006-01-02" }}</span>
+          <span class="row__t">{{ .title }}{{ with .host }} → <span class="row__out">{{ . }}</span>{{ end }}</span>
+          <span class="row__tags">{{ delimit (first 2 .tags) " · " }}</span>
+        </a>
+      {{ end }}
+    </section>
+  {{ end }}
+</main>

@@ -1,0 +1,153 @@
+{{- $src := .src -}}
+{{- $data := .data -}}
+{{- $items := slice -}}
+
+{{- if eq $src.kind "atom" -}}
+  {{- range $e := (partial "rawlist.html" (dict "value" $data.entry)) -}}
+    {{/* <link> is a map when there is one, a slice when there are several */}}
+    {{- $links := partial "rawlist.html" (dict "value" $e.link) -}}
+    {{/* a <link> with no attributes at all (no rel=, no href=) unmarshals
+         to a bare string rather than a map; rawattr.html guards the -rel
+         and -href reads, and its text content — the whole point of the
+         bare shape — stands in for the missing -href */}}
+    {{- $url := "" -}}
+    {{- range $links -}}
+      {{- if eq (partial "rawattr.html" (dict "value" . "attr" "-rel" "default" "alternate")) "alternate" -}}
+        {{- $url = partial "rawattr.html" (dict "value" . "attr" "-href" "default" (partial "rawstring.html" (dict "value" .))) -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- $permalink := "" -}}
+    {{- range $links -}}
+      {{- if eq (partial "rawattr.html" (dict "value" . "attr" "-rel" "default" "")) "related" -}}
+        {{- $permalink = partial "rawattr.html" (dict "value" . "attr" "-href" "default" (partial "rawstring.html" (dict "value" .))) -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $host := "" -}}
+    {{- if and $permalink $url -}}
+      {{- $host = (urls.Parse $url).Host -}}
+    {{- end -}}
+
+    {{- $tags := slice -}}
+    {{- $cats := partial "rawlist.html" (dict "value" $e.category) -}}
+    {{- range $cats -}}
+      {{/* a <category> with no term= attribute unmarshals to a bare string
+           rather than a map; rawattr.html guards the -term read, falling
+           back to the text content itself as the tag */}}
+      {{- $term := partial "rawattr.html" (dict "value" . "attr" "-term" "default" (partial "rawstring.html" (dict "value" .))) -}}
+      {{- with $term -}}{{- $tags = $tags | append (lower .) -}}{{- end -}}
+    {{- end -}}
+
+    {{/* <content> is a map when it carries a type= attribute, and a bare
+         string when a feed omits type= (valid Atom; it defaults to
+         "text") — rawstring.html handles either shape */}}
+    {{- $body := partial "rawstring.html" (dict "value" $e.content) -}}
+
+    {{/* <title> is a map when a generator (WordPress, Blogger, …) emits
+         type= on it */}}
+    {{- $title := partial "rawstring.html" (dict "value" $e.title) -}}
+
+    {{/* <updated> is the REQUIRED Atom element; <published> is optional.
+         Fall back so a feed emitting only <updated> still dates its
+         items, rather than silently dropping every one of them. */}}
+    {{- $when := partial "rawstring.html" (dict "value" $e.published) -}}
+    {{- if not $when -}}{{- $when = partial "rawstring.html" (dict "value" $e.updated) -}}{{- end -}}
+
+    {{- $d := partial "safedate.html" (dict "value" $when "src" $src.key "title" $title) -}}
+    {{- if $d.ok -}}
+      {{/* summary is truncated for display, but also feeds the excludes
+           filter in items.html:15 — it is not dead even where it is
+           never rendered */}}
+      {{- $items = $items | append (dict
+          "title"     $title
+          "url"       $url
+          "permalink" $permalink
+          "host"      $host
+          "date"      $d.date
+          "tags"      $tags
+          "summary"   (partial "truncate.html" (dict "s" (htmlUnescape (plainify $body)) "n" 180))
+          "image"     ""
+          "rating"    0) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if eq $src.kind "rss" -}}
+  {{- range $i := (partial "rawlist.html" (dict "value" $data.channel.item)) -}}
+    {{- $body := htmlUnescape (plainify (partial "rawstring.html" (dict "value" $i.description))) -}}
+    {{- $title := partial "rawstring.html" (dict "value" $i.title) -}}
+    {{/* Mastodon items have no <title>; fall back to the body */}}
+    {{- if not $title -}}{{- $title = partial "truncate.html" (dict "s" $body "n" 140) -}}{{- end -}}
+
+    {{- $tags := slice -}}
+    {{- with $i.category -}}
+      {{- range (partial "rawlist.html" (dict "value" .)) -}}
+        {{- $tags = $tags | append (lower (partial "rawstring.html" (dict "value" .))) -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- $d := partial "safedate.html" (dict "value" (partial "rawstring.html" (dict "value" $i.pubDate)) "src" $src.key "title" $title) -}}
+    {{- if $d.ok -}}
+      {{/* summary is truncated for display, but also feeds the excludes
+           filter in items.html:15 — it is not dead even where it is
+           never rendered */}}
+      {{- $items = $items | append (dict
+          "title"     $title
+          "url"       (partial "rawstring.html" (dict "value" $i.link))
+          "permalink" ""
+          "host"      ""
+          "date"      $d.date
+          "tags"      $tags
+          "summary"   (partial "truncate.html" (dict "s" $body "n" 180))
+          "image"     ""
+          "rating"    0) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if eq $src.kind "goodreads" -}}
+  {{- range $i := (partial "rawlist.html" (dict "value" $data.channel.item)) -}}
+    {{- $link := partial "rawstring.html" (dict "value" $i.link) -}}
+    {{- $link = replaceRE `\?utm_medium=api&utm_source=rss` "" $link -}}
+
+    {{- $title := partial "rawstring.html" (dict "value" $i.title) -}}
+
+    {{/* user_read_at is empty on some entries; fall back to pubDate */}}
+    {{- $when := partial "rawstring.html" (dict "value" $i.user_read_at) -}}
+    {{- if not $when -}}{{- $when = partial "rawstring.html" (dict "value" $i.pubDate) -}}{{- end -}}
+
+    {{- $author := replaceRE `\s+` " " (partial "rawstring.html" (dict "value" $i.author_name)) -}}
+
+    {{/* user_rating is normally a small int, but never trust a feed:
+         a non-numeric value (e.g. "N/A") would panic a bare `int` call.
+         Fall back to 0 and clamp to the 0-5 star range. */}}
+    {{- $rating := 0 -}}
+    {{- with try (int (partial "rawstring.html" (dict "value" $i.user_rating) | default "0")) -}}
+      {{- with .Err -}}
+        {{- warnf "friedrich: source %q item %q has non-numeric rating %q; defaulting to 0" $src.key $title (partial "rawstring.html" (dict "value" $i.user_rating)) -}}
+      {{- else -}}
+        {{- $rating = .Value -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if lt $rating 0 -}}{{- $rating = 0 -}}{{- end -}}
+    {{- if gt $rating 5 -}}{{- $rating = 5 -}}{{- end -}}
+
+    {{- $d := partial "safedate.html" (dict "value" $when "src" $src.key "title" $title) -}}
+    {{- if $d.ok -}}
+      {{/* spec calls for book_large_image_url: book_medium_image_url is
+           a 98px-wide thumbnail, a 39% upscale on the full-width tile */}}
+      {{- $items = $items | append (dict
+          "title"     $title
+          "url"       $link
+          "permalink" ""
+          "host"      ""
+          "date"      $d.date
+          "tags"      slice
+          "summary"   $author
+          "image"     (partial "rawstring.html" (dict "value" $i.book_large_image_url))
+          "rating"    $rating) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- return $items -}}

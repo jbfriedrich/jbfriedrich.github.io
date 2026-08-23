@@ -1,0 +1,27 @@
+{{- /*
+  Safely read a named attribute from a raw unmarshalled XML element.
+
+  Hugo's XML unmarshal only carries attributes on the map shape: an element
+  with at least one attribute ("<link href=… rel=…>", "<category term=…>")
+  unmarshals to a map with each attribute under a "-name" key, but an
+  element with none at all ("<link>https://example.org/</link>",
+  "<category>plain</category>") unmarshals to a bare string instead — no
+  map, so nothing to index. `index` on that string panics the whole build.
+  Every attribute read in normalise.html reads off a value of exactly this
+  kind, so this is a shared choke point next to rawlist.html and
+  rawstring.html, not a per-call concern.
+
+  Params:
+    .value   — the raw unmarshalled element: nil, a string, or a map
+    .attr    — the attribute key to read (e.g. "-href", "-term")
+    .default — (optional) returned when .value isn't a map, or the map
+               doesn't carry .attr
+
+  Returns: the attribute string, or .default ("" if not given)
+*/ -}}
+{{- $v := .value -}}
+{{- $out := .default | default "" -}}
+{{- if reflect.IsMap $v -}}
+  {{- $out = index $v .attr | default $out -}}
+{{- end -}}
+{{- return $out -}}

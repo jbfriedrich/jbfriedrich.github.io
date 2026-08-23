@@ -1,0 +1,21 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ .Site.Title }}</title>
+<meta name="description" content="{{ .Site.Params.tagline }}">
+<meta name="fediverse:creator" content="{{ .Site.Params.fediverseCreator }}">
+<link rel="me" href="{{ .Site.Params.mastodon }}">
+<script>
+  /* runs before first paint so the chosen theme never flashes */
+  (function () {
+    try {
+      var t = localStorage.getItem("theme");
+      if (t === "light" || t === "dark") {
+        document.documentElement.setAttribute("data-theme", t);
+      }
+    } catch (e) {}
+  })();
+</script>
+{{ with resources.Get "css/main.css" }}
+  {{ $css := . | css.TailwindCSS (dict "minify" true) }}
+  <link rel="stylesheet" href="{{ $css.RelPermalink }}">
+{{ end }}

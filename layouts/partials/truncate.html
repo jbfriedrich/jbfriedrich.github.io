@@ -1,0 +1,23 @@
+{{- /*
+  Truncate a plain string to at most .n runes, cutting on a word boundary
+  and appending "…" only when the string was actually cut.
+
+  A raw `substr` can land mid-word ("I always liked Br") and gives no
+  visual sign anything was cut at all. This is that missing indicator,
+  factored out because every branch of normalise.html that truncates a
+  feed-supplied string needs it, the same reasoning as safedate.html's
+  for time values.
+
+  Params:
+    .s — the plain string to truncate (already plainify/htmlUnescape'd)
+    .n — the maximum length in runes before truncation
+
+  Returns: the (possibly truncated) string
+*/ -}}
+{{- $s := .s | default "" -}}
+{{- $n := .n -}}
+{{- $cut := substr $s 0 $n -}}
+{{- if ne $cut $s -}}
+  {{- $cut = printf "%s…" (replaceRE `\s+\S*$` "" $cut) -}}
+{{- end -}}
+{{- return $cut -}}

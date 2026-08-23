@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" >
+  <channel>
+    <title>Jason's bookshelf: quirks</title>
+    <link><![CDATA[https://www.goodreads.com/review/list_rss/145074430?shelf=quirks]]></link>
+    <description><![CDATA[Goodreads items whose child elements carry attributes]]></description>
+
+    <item>
+      <guid><![CDATA[https://www.goodreads.com/review/show/9000000010?utm_medium=api&utm_source=rss]]></guid>
+      <pubDate><![CDATA[Thu, 20 Aug 2026 12:00:00 -0700]]></pubDate>
+      <title lang="en">Quirky Title Book</title>
+      <link><![CDATA[https://www.goodreads.com/review/show/9000000010?utm_medium=api&utm_source=rss]]></link>
+      <book_medium_image_url><![CDATA[https://i.gr-assets.com/images/S/quirk1._SX98_.jpg]]></book_medium_image_url>
+      <book_large_image_url><![CDATA[https://i.gr-assets.com/images/S/quirk1.jpg]]></book_large_image_url>
+      <author_name>Quirk Author One</author_name>
+      <user_rating>4</user_rating>
+      <user_read_at></user_read_at>
+    </item>
+    <item>
+      <guid><![CDATA[https://www.goodreads.com/review/show/9000000011?utm_medium=api&utm_source=rss]]></guid>
+      <pubDate><![CDATA[Wed, 19 Aug 2026 12:00:00 -0700]]></pubDate>
+      <title>Quirky Read-At And Author Book</title>
+      <link><![CDATA[https://www.goodreads.com/review/show/9000000011?utm_medium=api&utm_source=rss]]></link>
+      <book_medium_image_url><![CDATA[https://i.gr-assets.com/images/S/quirk2._SX98_.jpg]]></book_medium_image_url>
+      <book_large_image_url><![CDATA[https://i.gr-assets.com/images/S/quirk2.jpg]]></book_large_image_url>
+      <author_name lang="en">Quirk Author Two</author_name>
+      <user_rating>3</user_rating>
+      <user_read_at source="import"><![CDATA[Wed, 19 Aug 2026 00:00:00 +0000]]></user_read_at>
+    </item>
+  </channel>
+</rss>
