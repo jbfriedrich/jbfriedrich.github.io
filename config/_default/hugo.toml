@@ -30,17 +30,6 @@ disableKinds = ["taxonomy", "term", "section", "page", "RSS", "sitemap", "robots
   fediverseCreator = "@jason@click.ba.it"
   bio = "Lefty, tech nerd, movie trivia hoarder and IT professional — I specialise in shaking my fist at clouds for a living. Everything I publish, in one place."
 
-# resources.GetRemote resolves a remote resource's media type from three signals --
-# the Content-Type header, the URL's file extension, and the content itself -- and then
-# checks the result against a security allowlist. asides.blog serves its feed from a
-# path with NO file extension (/rss/) as `application/rss+xml`, which is not on Hugo's
-# default allowlist, so on some hosts resolution falls through to the header and the
-# fetch fails with "failed to resolve media type". This entry supplements the default
-# allowlist (it does not replace it). Atom is listed too: undertow.blog's feeds are
-# Atom and are exposed to the identical failure.
-[security.http]
-  mediaTypes = ['^application/rss\+xml$', '^application/atom\+xml$']
-
 [caches.getresource]
   dir    = ":cacheDir/:project"
   maxAge = "55m"

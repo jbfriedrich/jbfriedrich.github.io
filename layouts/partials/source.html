@@ -1,6 +1,13 @@
 {{- $src := .src -}}
 {{- $out := dict "ok" false "data" nil -}}
-{{- with try (resources.GetRemote $src.feed) -}}
+{{/* Accept-Encoding: identity is deliberate. asides.blog returns a gzip-compressed
+     body WITHOUT a Content-Encoding: gzip header, so Go does not decompress it, content
+     sniffing sees gzip magic bytes that contradict the declared application/rss+xml, and
+     GetRemote fails with "failed to resolve media type". Requesting an uncompressed
+     response sidesteps a whole class of upstream compression bugs; these feeds are tens
+     of kilobytes, so the bandwidth is irrelevant. */}}
+{{- $opts := dict "headers" (dict "Accept-Encoding" "identity") -}}
+{{- with try (resources.GetRemote $src.feed $opts) -}}
   {{- with .Err -}}
     {{- warnf "friedrich: source %q unreachable: %s" $src.key . -}}
   {{- else -}}
