@@ -26,7 +26,11 @@
     } catch (e) {}
   })();
 </script>
+{{/* ExecuteAsTemplate first: main.css builds its @source paths from
+     hugo.WorkingDir, because Tailwind resolves relative ones against the
+     process working directory and the deploy tool does not run hugo from the
+     project root. See the comment at the top of main.css. */}}
 {{ with resources.Get "css/main.css" }}
-  {{ $css := . | css.TailwindCSS (dict "minify" true) }}
+  {{ $css := . | resources.ExecuteAsTemplate "css/main.css" $ | css.TailwindCSS (dict "minify" true) }}
   <link rel="stylesheet" href="{{ $css.RelPermalink }}">
 {{ end }}

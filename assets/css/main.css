@@ -1,20 +1,28 @@
 @import "tailwindcss" source(none);
 
 /* Hugo pipes this stylesheet to the Tailwind binary on stdin, so a relative
-   @source path resolves against the PROJECT ROOT, not against assets/css. The
-   earlier `@source "../../layouts"` therefore scanned nothing at all, and no
-   utility class in a template ever compiled -- which is why this file used to
-   carry every value by hand.
+   @source path is resolved by Tailwind against its own PROCESS working
+   directory -- not against this file, and not against the Hugo project. The
+   two differ whenever Hugo is invoked with --source from somewhere else, which
+   is exactly how the deploy tool builds this site: `hugo --source <clone>` run
+   from the service's working directory. A relative path then matches nothing,
+   compiles no utilities, and still exits 0, publishing an unstyled page.
+
+   So the paths are absolute, and Hugo fills them in: this stylesheet is run
+   through ExecuteAsTemplate before it reaches Tailwind. hugo.WorkingDir is the
+   project root regardless of where the process was started.
 
    Scanning the templates rather than Hugo's hugo_stats.json keeps the build a
    single pass. Hugo writes that stats file at the END of a build, so a build
    that reads it compiles the PREVIOUS run's class list; the site is rebuilt
    unattended by a webhook that runs `hugo` exactly once. */
-@source "layouts";
-@source "assets";
+@source "{{ hugo.WorkingDir }}/layouts";
+@source "{{ hugo.WorkingDir }}/assets";
 
-/* Tile widths are assembled from config values (`lg:col-span-{{ $span }}`), so
-   no literal class name exists in the template for the scanner to find. */
+/* Tile widths are assembled from a config value -- the template interpolates
+   the span into "lg:col-span-N" -- so no literal class name exists for the
+   scanner to find. Note this file is run through ExecuteAsTemplate, so a
+   literal Go template delimiter in a comment here would be executed. */
 @source inline("{md:,lg:,}col-span-{1,2,3,4,5,6}");
 
 @theme {
