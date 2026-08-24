@@ -28,6 +28,20 @@ if ! hugo --config "$CONFIG" --destination public_test --quiet; then
 fi
 python3 tests/assert.py public_test
 
+# The shape the deploy tool actually builds: --minify, and --source pointed at
+# the project from a different working directory. Tailwind resolves @source
+# against the process working directory, so this is the only build that proves
+# the published stylesheet has any rules in it. Run from / on purpose.
+echo "== deploy shape =="
+ROOT="$PWD"
+rm -rf public_deploy
+if ! (cd / && hugo --gc --minify --source "$ROOT" \
+        --destination "$ROOT/public_deploy" --quiet); then
+  echo "hugo exited non-zero building the deploy shape" >&2
+  exit 1
+fi
+python3 tests/assert_deploy.py public_deploy
+
 echo "== signal =="
 rm -rf public_signal
 if ! HUGO_PARAMS_PRESET=signal hugo --config "$CONFIG" --destination public_signal --quiet; then

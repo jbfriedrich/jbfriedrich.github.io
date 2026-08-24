@@ -5,3 +5,4 @@ public_signal/
 resources/
 .hugo_build.lock
 .DS_Store
+public_deploy/

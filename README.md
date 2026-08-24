@@ -96,10 +96,23 @@ component rules: it declares the theme and the six source hues, and that is all.
 
 ### The @source path
 
-Hugo pipes the stylesheet to the Tailwind binary on stdin, so a relative `@source` path
-is resolved by Tailwind against the **project root**, not against `assets/css`. A wrong
-path scans nothing, compiles no utilities, and still exits 0 — an unstyled page from a
-clean build. `@source "layouts"` is correct; `@source "../../layouts"` is not.
+Tailwind resolves a relative `@source` path against **its own process working
+directory** — not against this stylesheet, and not against the Hugo project. Hugo pipes
+the stylesheet in on stdin, so there is no file for Tailwind to be relative to, and the
+working directory is wherever `hugo` itself was started.
+
+Those are the same directory when you run `hugo` from the project root, and different
+when the deploy tool runs `hugo --gc --minify --source <clone>` from the service's own
+working directory. A relative path then matches nothing, compiles no utilities, and
+**still exits 0** — publishing a page with a stylesheet that is all theme and no rules.
+That shipped once.
+
+So `main.css` is run through `ExecuteAsTemplate` and builds absolute paths from
+`hugo.WorkingDir`, which is the project root however hugo was invoked. One consequence:
+a Go template delimiter written literally in a comment in that file will be executed.
+
+`tests/run.sh` builds the deploy shape from `/` and asserts the published stylesheet has
+rules in it, because a build from the project root cannot catch this.
 
 Scanning the templates rather than Hugo's `hugo_stats.json` keeps the build a single
 pass. Hugo writes that file at the *end* of a build, so a build that reads it compiles
@@ -110,7 +123,8 @@ Tile widths are assembled from config (`lg:col-span-{{ $span }}`), so no literal
 name exists for the scanner to find. `@source inline(...)` names the range instead.
 
 `tests/assert.py` asserts that the layout's load-bearing utilities are in the compiled
-sheet, so a broken scan fails the suite rather than shipping.
+sheet, and `tests/assert_deploy.py` asserts the same of the deploy-shaped build, so a
+broken scan fails the suite rather than shipping.
 
 ### Theme tokens
 
@@ -205,6 +219,11 @@ of the feed within days: counts are honoured, cross-posted asides do not appear 
 Mastodon tile, link cards point their title at the write-up and their domain label at the
 outbound article, no mosaic row is left short, book covers are self-hosted, entities are
 decoded once.
+
+The suite builds three times: both presets from the project root, and once in the shape
+blogdeploy uses — `--gc --minify --source`, started from a different working directory.
+Only the third proves the stylesheet that ships has any rules in it, and `--minify`
+drops optional attribute quotes, so its assertions do not assume `attr="value"`.
 
 `tests/hugo.test.yaml` is merged over `hugo.yaml` and adds three sources that are meant to
 fail — one per failure mode — so the guarantee above stays covered. It also disables the
