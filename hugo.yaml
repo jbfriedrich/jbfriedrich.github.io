@@ -21,14 +21,25 @@ module:
 caches:
   getresource:
     dir: ":cacheDir/:project"
-    # Just under the rebuild interval, so a scheduled rebuild normally serves
-    # from cache instead of hitting six third parties every hour.
-    maxAge: "55m"
+    # Comfortably under the rebuild interval, so every scheduled rebuild sees
+    # fresh feeds. What the cache actually buys is not re-fetching six third
+    # parties when a push triggers a webhook build right after a scheduled one.
+    #
+    # It has to clear the interval with room to spare, not merely fit inside it.
+    # The timer is hourly with RandomizedDelaySec=300, so two scheduled runs can
+    # be as little as 55 minutes apart -- and an off-cycle webhook build
+    # re-anchors the cache clock to a time that is not on the hour. At 55m that
+    # left content a full cycle stale.
+    maxAge: "45m"
 
 params:
   author: "Jason Friedrich"
   email: "hello@friedrich.uk"
   tagline: "Websites, projects & social media"
+  # Card image for link previews: a 1200x630 banner, the same one the wilde
+  # blogs ship. Kept in step by hand -- this site does not use that theme.
+  ogImage: "/images/og-feature-image.jpg"
+  ogImageAlt: "Long-exposure neon light trails along a city street at night"
   bio: "Lefty, tech nerd, movie trivia hoarder and IT professional. I specialise in shaking my fist at clouds for a living. Everything I write on the Internet – all in one place."
   # Copy for a tile with nothing in it. A source that resolves and simply has
   # nothing to show says so; one that could not be reached says something else,
@@ -85,7 +96,7 @@ params:
       hue: links
 
     - key: asides
-      label: Asides
+      label: Ramblings
       kind: rss
       feed: "https://asides.blog/rss/"
       home: "https://asides.blog/"

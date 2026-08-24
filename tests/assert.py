@@ -197,6 +197,48 @@ for key in REAL:
 check('rel="me"' in html, "rel=me is missing (mastodon verification)")
 check("fediverse:creator" in html, "fediverse:creator meta is missing")
 check("hello@friedrich.uk" in html, "the contact address is missing")
+
+# Link previews. Every one of these is invisible on the page itself, so nothing
+# but a test notices when one goes missing.
+for tag in ('property="og:title"', 'property="og:description"', 'property="og:url"',
+            'property="og:image"', 'property="og:type"', 'property="og:site_name"',
+            'name="twitter:card"', 'name="twitter:image"', 'rel="canonical"'):
+    check(tag in html, f"{tag} is missing: link previews will fall back to guesswork")
+
+og = re.search(r'property="og:image" content="([^"]+)"', html)
+check(og is not None and og.group(1).startswith("https://"),
+      "og:image is not an absolute URL; a scraper has no page to resolve it against")
+if og:
+    local = BUILD / og.group(1).split("/", 3)[-1]
+    check(local.exists(), f"og:image points at {og.group(1)} which this build does not contain")
+
+# The card type has to match the image it points at. The card is a 1200x630
+# banner, so a large card is right -- but a summary_large_image whose image is
+# not 1.91:1 gets cropped by the consumer, so the two are checked together.
+card = re.search(r'name="twitter:card" content="([^"]+)"', html)
+check(card is not None and card.group(1) == "summary_large_image",
+      "twitter:card should be 'summary_large_image' for a 1200x630 banner")
+if og:
+    local = BUILD / og.group(1).split("/", 3)[-1]
+    if local.exists():
+        import struct
+        with local.open("rb") as fh:
+            data = fh.read()
+        # Minimal JPEG SOF parse: enough to catch a card image swapped for one
+        # of the wrong shape, without adding a dependency to the suite.
+        i, dims = 2, None
+        while i < len(data) - 9:
+            if data[i] != 0xFF:
+                i += 1
+                continue
+            marker = data[i + 1]
+            if 0xC0 <= marker <= 0xCF and marker not in (0xC4, 0xC8, 0xCC):
+                dims = struct.unpack(">HH", data[i + 5:i + 9])
+                break
+            i += 2 + struct.unpack(">H", data[i + 2:i + 4])[0]
+        check(dims == (630, 1200),
+              f"og:image is {dims and (dims[1], dims[0])}, not 1200x630: "
+              "a summary_large_image card will be cropped")
 m = re.search(r"\d\d:\d\d \((\d+)/(\d+) sources\)", html)
 check(m is not None, "the footer's updated/source line is missing")
 # The visible label is an icon, so the only thing announcing what the number

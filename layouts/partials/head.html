@@ -13,8 +13,31 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{ .Site.Title }}</title>
 <meta name="description" content="{{ .Site.Params.tagline }}">
+<link rel="canonical" href="{{ .Permalink }}">
 <meta name="fediverse:creator" content="{{ .Site.Params.fediverseCreator }}">
 <link rel="me" href="{{ .Site.Params.mastodon }}">
+
+{{/* Link previews. The card is a 1200x630 banner, so summary_large_image --
+     the same image the wilde blogs use, kept in step by hand rather than
+     shared, since this site does not use that theme.
+
+     The description is the bio rather than the tagline: a preview has room for
+     a sentence, and the tagline is three words written to sit under a name. */}}
+{{- $ogImage := absURL .Site.Params.ogImage -}}
+<meta property="og:site_name" content="{{ .Site.Title }}">
+<meta property="og:locale" content="{{ replace .Site.LanguageCode "-us" "_US" }}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ .Site.Title }} · {{ .Site.Params.tagline }}">
+<meta property="og:description" content="{{ .Site.Params.bio }}">
+<meta property="og:url" content="{{ .Permalink }}">
+<meta property="og:image" content="{{ $ogImage }}">
+<meta property="og:image:alt" content="{{ .Site.Params.ogImageAlt }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ .Site.Title }} · {{ .Site.Params.tagline }}">
+<meta name="twitter:description" content="{{ .Site.Params.bio }}">
+<meta name="twitter:image" content="{{ $ogImage }}">
 <script>
   /* runs before first paint so the chosen theme never flashes */
   (function () {
