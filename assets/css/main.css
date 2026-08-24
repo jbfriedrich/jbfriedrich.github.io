@@ -52,16 +52,23 @@
 body { background: var(--bg); color: var(--ink); font-size: var(--s-0); margin: 0; }
 
 /* ---- hero ---- */
+/* The hero is a card, matching the tiles below it -- not a full-width band.
+   This mirrors the approved design; earlier it rendered as a plain band because
+   the implementation plan specified no .hero rules at all. */
 .hero { display:flex; align-items:center; gap:var(--sp-3); padding:var(--sp-3);
-        border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  margin:var(--sp-3) var(--sp-3) 0; background:var(--tile);
+  border:1px solid var(--line); border-radius:20px; flex-wrap:wrap; }
 .hero__av { width:116px; height:116px; aspect-ratio:1/1; border-radius:50%;
             object-fit:cover; flex:none; }
 .hero__who { flex:1 1 320px; min-width:0; }
 .hero__name { margin:0 0 var(--sp-1); font-size:var(--s-3); line-height:1.1; }
 .hero__bio { margin:0 0 var(--sp-1); color:var(--dim); font-size:var(--s-0); max-width:60ch; }
 .hero__links { display:flex; gap:var(--sp-2); flex-wrap:wrap; font-size:var(--s--1); }
-.hero__links a { color:var(--ink); text-decoration:none; border-bottom:1px solid var(--line); }
-.hero__links a:hover { border-color:var(--ink); }
+/* Pills, not underlined text: these are navigation targets sitting beside the
+   bio, and the pill shape separates them from the prose above. */
+.hero__links a { color:var(--dim); text-decoration:none; font-weight:600;
+  border:1px solid var(--line); padding:7px 14px; border-radius:99px; }
+.hero__links a:hover { color:var(--ink); border-color:var(--dim); }
 .hero__status { margin-left:auto; text-align:right; color:var(--dim); font-size:var(--s--1);
                  display:flex; flex-direction:column; align-items:flex-end; gap:var(--sp-1); }
 #theme-toggle { font: inherit; font-size:var(--s--1); color:var(--dim); background:var(--tile);
