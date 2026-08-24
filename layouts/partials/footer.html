@@ -1,7 +1,33 @@
-<footer class="foot">
-  <a class="foot__mail" href="mailto:{{ .Site.Params.email }}">
+{{/* A card, like the hero: the mosaic sits between two of them rather than
+     running off the bottom of the page into bare background.
+
+     Three columns rather than flex + auto margins, so the middle cell is
+     centred on the page and not merely centred in whatever space the other two
+     leave. The columns are assigned explicitly because the middle cell is
+     hidden on narrow viewports, and a hidden grid item stops being a grid item
+     -- with automatic placement the copyright would slide left into it. */}}
+<footer class="mb-loose grid grid-cols-3 items-center gap-loose rounded-3xl border border-line bg-tile p-loose text-meta">
+  <a class="col-start-1 inline-flex items-center gap-2 justify-self-start text-dim no-underline hover:text-ink"
+     href="mailto:{{ .Site.Params.email }}">
     <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M0 4a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H2a2 2 0 01-2-2V4zm2-1a1 1 0 00-1 1v.217l7 4.2 7-4.2V4a1 1 0 00-1-1H2z"/></svg>
     {{ .Site.Params.email }}
   </a>
-  <span class="foot__copy">© {{ now.Year }} {{ .Site.Params.author }}</span>
+  {{- $ok := 0 -}}
+  {{- range $src := .Site.Params.sources -}}
+    {{- if (partial "source.html" (dict "src" $src)).ok -}}{{- $ok = add $ok 1 -}}{{- end -}}
+  {{- end -}}
+  {{/* Build provenance, not navigation: first thing to go when the footer runs
+       out of room.
+
+       A clock would only restate the value, which already reads as a time. The
+       circular arrow names the thing that happened instead -- the page was
+       rebuilt -- and is a filled glyph, so it carries the same weight as the
+       envelope beside it. The label survives for screen readers, which get no
+       meaning from the icon at all. */}}
+  <span class="col-start-2 inline-flex items-center gap-2 justify-self-center text-dim max-sm:hidden">
+    <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" fill="currentColor"><path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>
+    <span class="sr-only">Updated</span>
+    {{ now.Format "15:04" }} ({{ $ok }}/{{ len .Site.Params.sources }} sources)
+  </span>
+  <span class="col-start-3 justify-self-end text-dim">© {{ now.Year }} {{ .Site.Params.author }}</span>
 </footer>

@@ -1,9 +1,15 @@
 <!doctype html>
 <html lang="en">
 <head>{{ partial "head.html" . }}</head>
-<body>
-  {{ partial "hero.html" . }}
-  {{ partial (printf "presets/%s.html" .Site.Params.preset) . }}
-  {{ partial "footer.html" . }}
+<body class="bg-page text-body text-ink">
+  {{/* One measure for the whole page, set once here rather than repeated on
+       each band: 80% of the viewport from the tablet breakpoint up, capped at
+       Tailwind's widest container, and wider than that on a phone where 80%
+       would be a third of the screen gone. */}}
+  <div class="mx-auto w-11/12 max-w-7xl md:w-4/5">
+    {{ partial "hero.html" . }}
+    {{ partial (printf "presets/%s.html" .Site.Params.preset) . }}
+    {{ partial "footer.html" . }}
+  </div>
 </body>
 </html>

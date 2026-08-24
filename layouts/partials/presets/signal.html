@@ -1,17 +1,26 @@
-<main class="board">
+<main class="flex flex-col gap-snug py-loose font-mono">
   {{ range $src := .Site.Params.sources }}
     {{ $r := partial "items.html" (dict "src" $src) }}
-    <section class="chan chan--{{ $src.hue }}" data-source="{{ $src.key }}" data-ok="{{ $r.ok }}">
-      <div class="chan__hd">
-        <span class="chan__dot"></span>
-        <span class="chan__nm">{{ $src.label }}</span>
-        <a class="chan__src" href="{{ $src.home }}">{{ replaceRE `^https?://` "" $src.home }}</a>
+    <section class="hue--{{ $src.hue }} overflow-hidden rounded-2xl border border-line bg-tile"
+             data-chan data-source="{{ $src.key }}" data-ok="{{ $r.ok }}">
+      <div class="flex items-center gap-3 bg-tint/(--tint-alpha) px-loose py-snug">
+        <span class="size-2.5 shrink-0 rounded-full bg-hue"></span>
+        <span class="text-meta uppercase tracking-widest text-hue">{{ $src.label }}</span>
+        {{ with $src.home }}
+          <a class="ml-auto text-meta text-dim no-underline hover:text-hue" href="{{ . }}" target="_blank" rel="noopener">{{ replaceRE `^https?://` "" . }}</a>
+        {{ end }}
       </div>
       {{ range $r.items }}
-        <a class="row" href="{{ .url }}">
-          <span class="row__d">{{ .date.Format "2006-01-02" }}</span>
-          <span class="row__t">{{ .title }}{{ with .host }} → <span class="row__out">{{ . }}</span>{{ end }}</span>
-          <span class="row__tags">{{ delimit (first 2 .tags) " · " }}</span>
+        {{/* Same rule as the channels preset: where there is a write-up of the
+             link, the row goes to it. The row is itself the anchor, so the
+             outbound host beside the title stays text rather than a nested
+             link, which is not valid HTML. */}}
+        <a class="grid min-w-0 grid-cols-[clamp(96px,8vw,132px)_1fr_auto] items-baseline gap-loose border-t border-line px-loose py-snug text-ink no-underline hover:bg-tint/(--tint-alpha)"
+           data-row target="_blank" rel="noopener"
+           href="{{ with .permalink }}{{ . }}{{ else }}{{ .url }}{{ end }}">
+          <span class="text-meta text-dim">{{ .date.Format "2006-01-02" }}</span>
+          <span class="min-w-0 truncate">{{ .title }}{{ with .host }} → <span class="font-semibold text-hue">{{ . }}</span>{{ end }}</span>
+          <span class="whitespace-nowrap text-meta text-dim max-sm:hidden">{{ delimit (first 2 .tags) " · " }}</span>
         </a>
       {{ end }}
     </section>

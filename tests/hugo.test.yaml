@@ -25,15 +25,8 @@ params:
       feed: "https://undertow.blog/posts/index.xml"
       home: "https://undertow.blog/posts/"
       count: 3
+      span: 2
       hue: posts
-
-    - key: links
-      label: Links
-      kind: atom
-      feed: "https://undertow.blog/links/index.xml"
-      home: "https://undertow.blog/links/"
-      count: 3
-      hue: links
 
     - key: notes
       label: Notes
@@ -41,7 +34,17 @@ params:
       feed: "https://undertow.blog/notes/index.xml"
       home: "https://undertow.blog/notes/"
       count: 3
+      span: 2
       hue: notes
+
+    - key: links
+      label: Links
+      kind: atom
+      feed: "https://undertow.blog/links/index.xml"
+      home: "https://undertow.blog/links/"
+      count: 3
+      span: 2
+      hue: links
 
     - key: asides
       label: Asides
@@ -49,6 +52,7 @@ params:
       feed: "https://asides.blog/rss/"
       home: "https://asides.blog/"
       count: 3
+      span: 3
       hue: asides
 
     - key: mastodon
@@ -59,18 +63,31 @@ params:
       count: 3
       overfetch: 25
       excludes: ["asides.blog"]
+      span: 3
       hue: masto
 
+    - key: reading
+      label: Currently reading
+      kind: goodreads
+      feed: "https://www.goodreads.com/review/list_rss/145074430?shelf=currently-reading"
+      count: 1
+      span: 2
+      hue: books
+      full: true
+
     - key: books
-      label: Books
+      label: Last read
       kind: goodreads
       feed: "https://www.goodreads.com/review/list_rss/145074430?shelf=read"
       home: "https://www.goodreads.com/jbfriedrich"
       count: 3
+      span: 4
       hue: books
       full: true
 
     # --- deliberate failures ------------------------------------------------
+    # Three of them, so they fill a mosaic row on their own and the row-packing
+    # assertion tests the real layout rather than an artefact of the overlay.
     # 404: GetRemote raises NO error and returns a nil value, so `try` alone
     # does not catch it -- only a nil check does.
     - key: gone
@@ -79,6 +96,7 @@ params:
       feed: "https://undertow.blog/there-is-no-such-feed.xml"
       home: "https://undertow.blog/"
       count: 3
+      span: 2
       hue: posts
 
     # Connection refused: port 9 (discard) is closed, so no server is needed.
@@ -88,6 +106,7 @@ params:
       feed: "http://127.0.0.1:9/unreachable.xml"
       home: "https://example.org/"
       count: 3
+      span: 2
       hue: posts
 
     # 200 with a body that is not a feed: the fetch succeeds and
@@ -98,4 +117,19 @@ params:
       feed: "https://undertow.blog/"
       home: "https://undertow.blog/"
       count: 3
+      span: 2
+      hue: posts
+
+    # --- resolves, but has nothing to show ----------------------------------
+    # Not a failure: the feed is real and parses, and every item is then filtered
+    # away. A live shelf that happens to be empty cannot be used to test this --
+    # it stops being empty the moment something is added to it.
+    - key: empty
+      label: Empty
+      kind: atom
+      feed: "https://undertow.blog/posts/index.xml"
+      empty: "Nothing on this shelf"
+      excludes: ["https"]
+      count: 3
+      span: 6
       hue: posts

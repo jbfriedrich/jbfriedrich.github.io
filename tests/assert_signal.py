@@ -20,8 +20,8 @@ def check(ok, what):
         fails.append(what)
 
 
-check('class="chan chan--posts"' in html, "signal markup did not render")
-check(re.search(r"\bclass=\"tile\b", html) is None, "channels markup leaked into the signal build")
+check("data-chan" in html and "hue--posts" in html, "signal markup did not render")
+check("data-tile" not in html, "channels markup leaked into the signal build")
 
 # same data layer: every source that reaches channels reaches signal too
 for key in ["posts", "links", "notes", "asides", "mastodon", "books"]:
@@ -30,7 +30,7 @@ for key in ["posts", "links", "notes", "asides", "mastodon", "books"]:
 
 # the shared hue tokens, not a second palette
 check("--h-posts" in html or True, "")  # tokens live in CSS, not markup
-check('class="row"' in html, "signal rendered no rows")
+check("data-row" in html, "signal rendered no rows")
 
 for f in fails:
     print("FAIL:", f)

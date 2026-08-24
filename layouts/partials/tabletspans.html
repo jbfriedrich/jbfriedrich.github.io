@@ -1,0 +1,36 @@
+{{- /* Tablet widths for the mosaic, one per source, in source order.
+
+   The six-column desktop mosaic collapses to a two-up layout on tablets, but
+   "every narrow tile takes half a row" only works when the narrow tiles come in
+   even-sized runs. Three narrow sources in a row leave the third one alone
+   beside an empty half — the same hole the desktop spans exist to avoid.
+
+   So: a wide source (3 columns or more) always takes the full width, and a run
+   of narrow sources pairs up, with the odd one out taking the full width too.
+
+   Takes .Site.Params.sources; returns a slice of column counts. */ -}}
+{{- $spans := slice -}}
+{{- range . -}}{{- $spans = $spans | append (int (.span | default 2)) -}}{{- end -}}
+{{- $n := len $spans -}}
+{{- $out := slice -}}
+{{- range $i, $s := $spans -}}
+  {{- if ge $s 3 -}}
+    {{- $out = $out | append 6 -}}
+  {{- else -}}
+    {{- /* how many narrow sources run unbroken up to this one */ -}}
+    {{- $before := 0 -}}
+    {{- range $j, $sj := $spans -}}
+      {{- if lt $j $i -}}
+        {{- if ge $sj 3 -}}{{- $before = 0 -}}{{- else -}}{{- $before = add $before 1 -}}{{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $last := true -}}
+    {{- if lt (add $i 1) $n -}}
+      {{- if lt (index $spans (add $i 1)) 3 -}}{{- $last = false -}}{{- end -}}
+    {{- end -}}
+    {{- /* $before is a 0-based position in the run: an even one starts a pair,
+           so if it is also the end of the run it has no partner. */ -}}
+    {{- $out = $out | append (cond (and $last (eq (mod $before 2) 0)) 6 3) -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}

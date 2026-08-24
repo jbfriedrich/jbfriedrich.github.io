@@ -1,17 +1,54 @@
-<main class="grid">
-  {{ range $src := .Site.Params.sources }}
+{{/* Tablet widths are derived from the configured spans rather than configured
+     separately -- see partials/tabletspans.html. */}}
+{{ $tablet := partial "tabletspans.html" .Site.Params.sources }}
+<main class="grid grid-cols-6 gap-snug py-loose">
+  {{ range $i, $src := .Site.Params.sources }}
     {{ $r := partial "items.html" (dict "src" $src) }}
-    <section class="tile tile--{{ $src.hue }}{{ if $src.full }} tile--full{{ end }}"
-             data-source="{{ $src.key }}" data-ok="{{ $r.ok }}">
-      <a class="tile__hd" href="{{ $src.home }}">
-        <span class="pip"></span>
-        <span class="tile__k">{{ $src.label }}</span>
-        <span class="tile__src">{{ replaceRE `^https?://` "" $src.home }} ↗</span>
-      </a>
-      <div class="tile__body{{ if $src.full }} books{{ end }}">
+    {{ $span := int ($src.span | default 2) }}
+    {{ $spanMd := index $tablet $i }}
+    {{/* The data- attributes are the test suite's hooks. Keeping them separate
+         from the classes means a styling change cannot quietly break a test,
+         and a test cannot pin a class the design wants to move. */}}
+    <section class="hue--{{ $src.hue }} col-span-6 md:col-span-{{ $spanMd }} lg:col-span-{{ $span }} flex flex-col overflow-hidden rounded-3xl border border-line bg-tile"
+             data-tile data-source="{{ $src.key }}" data-ok="{{ $r.ok }}"
+             data-span="{{ $span }}" data-span-md="{{ $spanMd }}">
+      <div class="flex items-center gap-2.5 border-b border-line bg-tint/(--tint-alpha) p-snug">
+        <span class="size-3 shrink-0 rounded-sm bg-hue"></span>
+        <span class="text-head font-bold text-hue">{{ $src.label }}</span>
+        {{/* A source need not have a public home page: a Goodreads shelf that
+             is only ever read here has nothing useful to point at. So the link
+             is the conditional part, not the whole band -- which also matches
+             the signal preset, where the heading was never the anchor. */}}
+        {{ with $src.home }}
+          <a class="ml-auto text-meta text-dim no-underline hover:text-hue"
+             href="{{ . }}" target="_blank" rel="noopener">{{ replaceRE `^https?://` "" . }} ↗</a>
+        {{ end }}
+      </div>
+      {{/* The shelf wraps in a row and the item lists stack, so the body's
+           direction is the one thing that differs between a cover tile and a
+           text tile. Flex items grow, so a short last row of covers fills the
+           width at any count and any viewport rather than leaving empty
+           cells inside the tile. */}}
+      {{/* A tile is never a blank box. With nothing to show it says which of
+           the two reasons applies -- the shelf is empty, or the feed could not
+           be read -- centred, so it reads as a state rather than as content
+           that failed to arrive. */}}
+      {{ if not $r.items }}
+        <div class="flex flex-1 items-center justify-center p-snug">
+          <p class="text-center text-dim" data-empty>
+            {{- if $r.ok -}}
+              {{ $src.empty | default $.Site.Params.emptyText }}
+            {{- else -}}
+              {{ $.Site.Params.unavailableText }}
+            {{- end -}}
+          </p>
+        </div>
+      {{ else }}
+      <div class="flex flex-1 p-tight {{ if $src.full }}flex-row flex-wrap items-start gap-tight{{ else }}flex-col{{ end }}">
         {{ range $item := $r.items }}
           {{ if $item.image }}
-            <a class="book" href="{{ .url }}">
+            <a class="flex grow basis-50 items-start gap-snug rounded-xl p-snug text-ink no-underline hover:bg-tint/(--tint-alpha)"
+               data-book href="{{ .url }}" target="_blank" rel="noopener">
               {{ $cover := "" }}
               {{ with try (resources.GetRemote .image) }}
                 {{ with .Err }}
@@ -38,27 +75,49 @@
                   {{ end }}
                 {{ end }}
               {{ end }}
-              {{ with $cover }}<img class="book__cover" src="{{ . }}" alt="" width="68" height="102">{{ end }}
-              <span class="book__meta">
-                <span class="book__t">{{ .title }}</span>
-                <span class="book__a">{{ .summary }}</span>
-                <span class="book__r" data-rating="{{ .rating }}">{{ strings.Repeat .rating "★" }}</span>
+              {{ with $cover }}
+                <img class="w-17 aspect-[2/3] shrink-0 rounded-sm object-cover"
+                     data-book-cover src="{{ . }}" alt="" width="68" height="102">
+              {{ end }}
+              <span class="flex min-w-0 flex-col gap-1.25">
+                {{/* Goodreads titles carry the full subtitle ("… : A
+                     Counterintuitive Approach to Living a Good Life"), which is
+                     several lines in a shelf card and drags the whole tile
+                     taller than the row it sits in. */}}
+                <span class="font-semibold">{{ partial "truncate.html" (dict "s" .title "n" 52) }}</span>
+                <span class="text-meta text-dim">{{ .summary }}</span>
+                {{/* A book on the currently-reading shelf has no rating yet, and
+                     Goodreads reports 0 for anything unrated. An empty star row
+                     is a gap in the card, not information. */}}
+                {{ with .rating }}
+                  <span class="tracking-widest text-hue" data-rating="{{ . }}">{{ strings.Repeat . "★" }}</span>
+                {{ end }}
               </span>
             </a>
           {{ else }}
-            <div class="item">
-              <a class="item__t" href="{{ .url }}">{{ .title }}</a>
-              <p class="item__m">
-                {{ with .host }}<span class="item__host">{{ . }}</span>{{ end }}
+            {{/* A link post has two destinations. The title goes to the
+                 write-up on the author's own site and the domain in the meta
+                 line goes to the thing being linked -- so the outbound target
+                 is named by the label that says where it leads, instead of a
+                 "my note" link wedged in after the tags. Every other source has
+                 one destination, and the title carries it. */}}
+            <div class="rounded-xl p-snug hover:bg-tint/(--tint-alpha)" data-item>
+              <a class="block font-semibold text-ink no-underline hover:underline" data-item-title
+                 target="_blank" rel="noopener"
+                 href="{{ with .permalink }}{{ . }}{{ else }}{{ .url }}{{ end }}">{{ .title }}</a>
+              <p class="mt-1.5 flex flex-wrap gap-2 text-meta text-dim">
+                {{ with .host }}
+                  <a class="font-bold text-hue no-underline hover:underline" data-item-host
+                     href="{{ $item.url }}" target="_blank" rel="noopener">{{ . }}</a>
+                {{ end }}
                 <span>{{ .date.Format "2 Jan 2006" }}</span>
                 {{ with .tags }}<span>{{ delimit (first 2 .) " · " }}</span>{{ end }}
-                {{ with .permalink }}<a class="item__note" href="{{ . }}">my note</a>{{ end }}
               </p>
             </div>
           {{ end }}
         {{ end }}
       </div>
-      <p class="tile__ft"><a href="{{ $src.home }}">All {{ lower $src.label }} →</a></p>
+      {{ end }}
     </section>
   {{ end }}
 </main>

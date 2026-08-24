@@ -29,7 +29,14 @@ params:
   author: "Jason Friedrich"
   email: "hello@friedrich.uk"
   tagline: "Websites, projects & social media"
-  bio: "Lefty, tech nerd, movie trivia hoarder and IT professional — I specialise in shaking my fist at clouds for a living. Everything I publish, in one place."
+  bio: "Lefty, tech nerd, movie trivia hoarder and IT professional. I specialise in shaking my fist at clouds for a living. Everything I write on the Internet – all in one place."
+  # Copy for a tile with nothing in it. A source that resolves and simply has
+  # nothing to show says so; one that could not be reached says something else,
+  # because they are different facts and a visitor can tell them apart. A source
+  # can override the first with its own `empty`.
+  emptyText: "Nothing here right now"
+  unavailableText: "This source is unavailable right now"
+
   # channels (tiles) or signal (dense rows). Both read the same normalised data.
   preset: "channels"
   mastodon: "https://click.ba.it/@jason"
@@ -42,7 +49,13 @@ params:
   #   overfetch items read before filtering, when excludes would otherwise eat
   #             the whole count
   #   excludes  drop items whose URL or summary contains any of these
-  #   full      render as a full-width tile
+  #   empty     what the tile says when the source resolves with no items,
+  #             overriding params.emptyText
+  #   span      tile width in columns of the six-column mosaic. The spans of the
+  #             sources in one row must add up to 6, or the row leaves a hole.
+  #             A tile of 3 or more goes full-width on tablets; smaller ones pair
+  #             up two per row.
+  #   full      render the tile body as a cover grid (books)
   sources:
     - key: posts
       label: Posts
@@ -50,6 +63,7 @@ params:
       feed: "https://undertow.blog/posts/index.xml"
       home: "https://undertow.blog/posts/"
       count: 3
+      span: 2
       hue: posts
 
     - key: notes
@@ -58,6 +72,7 @@ params:
       feed: "https://undertow.blog/notes/index.xml"
       home: "https://undertow.blog/notes/"
       count: 3
+      span: 2
       hue: notes
 
     - key: links
@@ -66,6 +81,7 @@ params:
       feed: "https://undertow.blog/links/index.xml"
       home: "https://undertow.blog/links/"
       count: 3
+      span: 2
       hue: links
 
     - key: asides
@@ -74,6 +90,7 @@ params:
       feed: "https://asides.blog/rss/"
       home: "https://asides.blog/"
       count: 3
+      span: 3
       hue: asides
 
     # Asides are cross-posted here, so the same item would appear twice on the
@@ -87,14 +104,26 @@ params:
       count: 3
       overfetch: 25
       excludes: ["asides.blog"]
+      span: 3
       hue: masto
 
+    - key: reading
+      label: Currently reading
+      kind: goodreads
+      feed: "https://www.goodreads.com/review/list_rss/145074430?shelf=currently-reading"
+      empty: "Not reading anything at the moment"
+      count: 1
+      span: 2
+      hue: books
+      full: true
+
     - key: books
-      label: Books
+      label: Last read
       kind: goodreads
       feed: "https://www.goodreads.com/review/list_rss/145074430?shelf=read"
       home: "https://www.goodreads.com/jbfriedrich"
-      count: 5
+      count: 3
+      span: 4
       hue: books
       full: true
 

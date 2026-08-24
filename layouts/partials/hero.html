@@ -1,21 +1,18 @@
-<header class="hero">
-  <img class="hero__av" src="/images/avatar.jpg" alt="{{ .Site.Params.author }}" width="116" height="116">
-  <div class="hero__who">
-    <h1 class="hero__name">{{ .Site.Params.author }}</h1>
-    <p class="hero__bio">{{ .Site.Params.bio }}</p>
-    <nav class="hero__links">
+{{/* A card, matching the tiles below it -- not a full-width band. */}}
+<header class="mt-loose flex flex-wrap items-center gap-loose rounded-3xl border border-line bg-tile p-loose">
+  <img class="size-29 shrink-0 rounded-full object-cover" src="/images/avatar.jpg"
+       alt="{{ .Site.Params.author }}" width="116" height="116">
+  <div class="min-w-0 grow basis-80">
+    <h1 class="mb-tight text-name leading-tight">{{ .Site.Params.author }}</h1>
+    <p class="mb-tight max-w-[60ch] text-dim">{{ .Site.Params.bio }}</p>
+    {{/* Pills, not underlined text: these are navigation targets sitting
+         beside the bio, and the pill shape separates them from the prose. */}}
+    <nav class="flex flex-wrap gap-snug text-meta">
       {{ range .Site.Params.links }}
-        <a href="{{ .url }}"{{ if .me }} rel="me"{{ end }}>{{ .label }}</a>
+        <a class="rounded-full border border-line px-3.5 py-1.75 font-semibold text-dim no-underline hover:border-dim hover:text-ink"
+           href="{{ .url }}" target="_blank" rel="{{ if .me }}me {{ end }}noopener">{{ .label }}</a>
       {{ end }}
     </nav>
   </div>
-  {{- $ok := 0 -}}
-  {{- range $src := .Site.Params.sources -}}
-    {{- if (partial "source.html" (dict "src" $src)).ok -}}{{- $ok = add $ok 1 -}}{{- end -}}
-  {{- end -}}
-  <div class="hero__status">
-    {{ $ok }}/{{ len .Site.Params.sources }} sources<br>
-    rebuilt {{ now.Format "15:04" }}
-    {{ partial "theme-toggle.html" . }}
-  </div>
+  {{ partial "theme-toggle.html" . }}
 </header>

@@ -39,14 +39,49 @@ Each entry under `params.sources` describes one source:
 | `label` | Heading shown on the tile |
 | `kind` | `atom`, `rss` or `goodreads` — selects the branch in `normalise.html` |
 | `feed` | Feed URL |
-| `home` | Where the tile heading links |
+| `home` | Where the tile heading links. Optional: omit it and the heading shows no link |
 | `count` | Items to display |
+| `empty` | What the tile says when the source resolves with no items, overriding `params.emptyText` |
 | `overfetch` | Items to read before filtering, when `excludes` would otherwise eat the count |
 | `excludes` | Drop items whose URL or summary contains any of these strings |
+| `span` | Tile width in columns of the six-column mosaic |
 | `hue` | Colour token for the tile |
-| `full` | Render as a full-width tile |
+| `full` | Render the tile body as a cover grid (books) |
 
 Adding a source is a new entry plus a hue in `assets/css/main.css`.
+
+### Spans
+
+The mosaic is six columns wide and each source sets its own `span`. The spans of the
+sources sharing a row have to add up to six, or the row ends in an empty half — so `span`
+is a layout decision made next to the source rather than derived from item counts. The
+current arrangement is `2 2 2 / 3 3 / 6`: three narrow tiles, then the two text-heavy
+sources that need the width, then the shelf.
+
+Tablet widths are derived, not configured: a source of three columns or more takes the
+full width, narrow ones pair up, and an odd one left over takes the full width too
+(`partials/tabletspans.html`). The breakpoints are Tailwind's `md` and `lg`; below `md`
+everything is one column.
+
+`tests/assert.py` packs the spans in document order and fails if any row stops short, in
+both layouts.
+
+### Empty tiles
+
+A tile is never a blank box. With nothing to show it says which of two things is true,
+because they are different facts: the source resolved and has nothing in it
+(`params.emptyText`, or the source's own `empty`), or it could not be read at all
+(`params.unavailableText`). A visitor can tell an empty shelf from a feed that is down.
+
+Testing this needs a source that is reliably empty, which a live shelf is not — it stops
+being empty the moment something lands on it. The suite uses a real feed with an
+`excludes` rule that filters every item away.
+
+`kind` names the **shape of the feed**, not what the source means. Two Goodreads
+shelves — read and currently-reading — are the same XML and share `kind: goodreads`;
+they differ in `key`, `label` and `feed`. A new `kind` is only warranted when a feed
+parses differently, because each one is another branch in `normalise.html` to keep
+working.
 
 ### Presets
 
@@ -54,12 +89,68 @@ Adding a source is a new entry plus a hue in `assets/css/main.css`.
 render the same normalised data through `partials/items.html`; neither contains any
 fetching or filtering logic.
 
+## CSS
+
+The templates are styled with Tailwind utilities. `assets/css/main.css` holds no
+component rules: it declares the theme and the six source hues, and that is all.
+
+### The @source path
+
+Hugo pipes the stylesheet to the Tailwind binary on stdin, so a relative `@source` path
+is resolved by Tailwind against the **project root**, not against `assets/css`. A wrong
+path scans nothing, compiles no utilities, and still exits 0 — an unstyled page from a
+clean build. `@source "layouts"` is correct; `@source "../../layouts"` is not.
+
+Scanning the templates rather than Hugo's `hugo_stats.json` keeps the build a single
+pass. Hugo writes that file at the *end* of a build, so a build that reads it compiles
+the previous run's class list, and this site is rebuilt unattended by a webhook that runs
+`hugo` once.
+
+Tile widths are assembled from config (`lg:col-span-{{ $span }}`), so no literal class
+name exists for the scanner to find. `@source inline(...)` names the range instead.
+
+`tests/assert.py` asserts that the layout's load-bearing utilities are in the compiled
+sheet, so a broken scan fails the suite rather than shipping.
+
+### Theme tokens
+
+`@theme` declares what Tailwind's own scales do not cover, which is the fluid type and
+space steps — Tailwind's are fixed, and this page holds a six-column mosaic and a single
+column with the same tokens. Declaring them there rather than as loose variables is what
+generates `text-meta`, `gap-snug`, `p-loose` and the rest.
+
+The semantic colours (`bg-page`, `bg-tile`, `text-ink`, `text-dim`, `border-line`) point
+at tokens the `:root` blocks flip with the theme. `text-hue` and `bg-tint` cannot: a
+custom property is substituted in the scope where it is **declared**, not where it is
+used, so a per-source hue has nothing to resolve against at the root of the document.
+They take a placeholder in `@theme` and each tile redeclares them for itself.
+
 ### Hue tokens
 
-The six source colours are chosen for perceptual distance, not by eye: every pair is at
-least ΔE 25 apart in both light and dark themes. Two earlier choices failed that and were
-replaced — green read as the same colour as teal, and Mastodon's brand periwinkle sat too
-close to the blue used for posts. Any colour added later should clear the same floor.
+Every colour is a Tailwind palette variable — `var(--color-blue-600)`, not a hex value.
+Tailwind v4 emits a palette variable only where it is referenced, so naming the shades in
+`main.css` is what puts them in the compiled sheet; the rest of the palette costs nothing.
+
+The six were picked for perceptual distance rather than by eye: blue, pink, emerald,
+amber, violet and rose, whose closest pair is ΔE 33 apart in light and ΔE 32 in dark,
+clear of the ΔE 25 floor two tiles need to read as different sources at a glance. Light
+mode takes emerald and amber one shade darker than the rest (700, not 600) because at 600
+they fall to 3.7:1 and 3.2:1 against white, under the 4.5:1 the domain labels and tile
+headings need.
+
+Neutrals are `zinc`, not `slate`: slate carries enough chroma (.042 at 950 against zinc's
+.006) to read as blue rather than charcoal across a whole page of it.
+
+The tint behind a tile heading is the `100` shade laid over the tile through Tailwind's
+opacity modifier — `bg-tint/(--tint-alpha)`. The scale has nothing between `50` and `100`,
+and `50` is barely there against a white tile while `100` reads as a filled band; the
+modifier is the framework's answer to that, and it keeps the value on the palette instead
+of introducing a shade that is not. `--tint-alpha` is one knob per theme: dark wants the
+`950` at full strength.
+
+Any colour added later should clear both floors. `tests/assert.py` checks that the
+compiled CSS still carries Tailwind's variables, so a hand-mixed hex creeping back in
+fails the suite.
 
 ## How a feed becomes a tile
 
@@ -106,10 +197,14 @@ the live feeds, because a site whose job is reading other people's feeds is not 
 tested against frozen copies. A failure means a feed really is unreachable or has changed
 shape — which is worth hearing about.
 
+Test hooks are `data-` attributes, not classes, so a styling change cannot quietly break
+a test and a test cannot pin a class the design wants to move.
+
 Assertions are structural rather than content-based, since anything named would age out
 of the feed within days: counts are honoured, cross-posted asides do not appear in the
-Mastodon tile, link cards point their title at the outbound article and their note at the
-author's page, book covers are self-hosted, entities are decoded once.
+Mastodon tile, link cards point their title at the write-up and their domain label at the
+outbound article, no mosaic row is left short, book covers are self-hosted, entities are
+decoded once.
 
 `tests/hugo.test.yaml` is merged over `hugo.yaml` and adds three sources that are meant to
 fail — one per failure mode — so the guarantee above stays covered. It also disables the
