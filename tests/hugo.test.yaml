@@ -1,0 +1,101 @@
+# Test overlay. Merged over hugo.yaml:
+#
+#   hugo --config hugo.yaml,tests/hugo.test.yaml
+#
+# The real sources are inherited from hugo.yaml -- the suite fetches live feeds,
+# because a site whose whole job is reading other people's feeds is not usefully
+# tested against frozen copies of them.
+#
+# This file adds sources that are meant to fail, one per failure mode, so the
+# "a broken source costs one tile, never the build" guarantee stays under test.
+# They use real endpoints; nothing is served locally.
+#
+# Caching is off here so every run actually performs the fetches it claims to.
+caches:
+  getresource:
+    maxAge: "0s"
+
+params:
+  sources:
+    # --- the real six, inherited values repeated because a list replaces rather
+    # --- than merges. Keep in step with hugo.yaml.
+    - key: posts
+      label: Posts
+      kind: atom
+      feed: "https://undertow.blog/posts/index.xml"
+      home: "https://undertow.blog/posts/"
+      count: 3
+      hue: posts
+
+    - key: links
+      label: Links
+      kind: atom
+      feed: "https://undertow.blog/links/index.xml"
+      home: "https://undertow.blog/links/"
+      count: 3
+      hue: links
+
+    - key: notes
+      label: Notes
+      kind: atom
+      feed: "https://undertow.blog/notes/index.xml"
+      home: "https://undertow.blog/notes/"
+      count: 3
+      hue: notes
+
+    - key: asides
+      label: Asides
+      kind: rss
+      feed: "https://asides.blog/rss/"
+      home: "https://asides.blog/"
+      count: 3
+      hue: asides
+
+    - key: mastodon
+      label: Mastodon
+      kind: rss
+      feed: "https://click.ba.it/@jason.rss"
+      home: "https://click.ba.it/@jason"
+      count: 3
+      overfetch: 25
+      excludes: ["asides.blog"]
+      hue: masto
+
+    - key: books
+      label: Books
+      kind: goodreads
+      feed: "https://www.goodreads.com/review/list_rss/145074430?shelf=read"
+      home: "https://www.goodreads.com/jbfriedrich"
+      count: 3
+      hue: books
+      full: true
+
+    # --- deliberate failures ------------------------------------------------
+    # 404: GetRemote raises NO error and returns a nil value, so `try` alone
+    # does not catch it -- only a nil check does.
+    - key: gone
+      label: Gone
+      kind: atom
+      feed: "https://undertow.blog/there-is-no-such-feed.xml"
+      home: "https://undertow.blog/"
+      count: 3
+      hue: posts
+
+    # Connection refused: port 9 (discard) is closed, so no server is needed.
+    - key: down
+      label: Down
+      kind: atom
+      feed: "http://127.0.0.1:9/unreachable.xml"
+      home: "https://example.org/"
+      count: 3
+      hue: posts
+
+    # 200 with a body that is not a feed: the fetch succeeds and
+    # transform.Unmarshal fails, which is a separate failure needing its own try.
+    - key: garbage
+      label: Garbage
+      kind: atom
+      feed: "https://undertow.blog/"
+      home: "https://undertow.blog/"
+      count: 3
+      hue: posts

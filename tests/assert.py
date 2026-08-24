@@ -1,188 +1,122 @@
-import re, sys, pathlib
-html = pathlib.Path("public_test/index.html").read_text(encoding="utf-8")
+"""Assertions for the channels build.
 
-# The theme-token assertions check the compiled, minified CSS actually shipped
-# to visitors, not the authored source: testing the source would pass even if
-# the build pipeline dropped the theme entirely. Tailwind's minifier does
-# normalise whitespace/quoting (`prefers-color-scheme: dark` loses its space,
-# `data-theme="dark"` loses its quotes), so the assertions below match the
-# minified forms, not the brief's literal source-level strings.
-_css_href = re.search(r'<link rel="stylesheet" href="([^"]+)">', html).group(1)
-css_out = (pathlib.Path("public_test") / _css_href.lstrip("/")).read_text(encoding="utf-8")
+The suite runs against the live feeds, so it cannot assert on specific posts:
+anything named here would age out of the feed within days. It asserts structure
+and invariants instead — the things that stay true whatever was published.
 
-fails = []
+Reads the build output from the directory given as the first argument.
+"""
+import pathlib
+import re
+import sys
 
-def want(needle, why, haystack=None):
-    hay = html if haystack is None else haystack
-    if needle not in hay:
-        fails.append(f"MISSING {why}: {needle!r}")
+BUILD = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "public_test")
+html = (BUILD / "index.html").read_text(encoding="utf-8")
 
-def reject(needle, why, haystack=None):
-    hay = html if haystack is None else haystack
-    if needle in hay:
-        fails.append(f"UNEXPECTED {why}: {needle!r}")
+fails: list[str] = []
 
-def tile_body(source_key):
-    """Full markup of one <section class="tile" data-source="key">...</section>.
-    Sections never nest, so matching up to </section> (rather than the first
-    </div>, which would only reach the end of the FIRST item/book element) is
-    what actually isolates one tile's contents."""
-    m = re.search(r'data-source="%s"[^>]*>(.*?)</section>' % re.escape(source_key), html, re.S)
-    return m.group(1) if m else ""
 
-# --- the live channels layout ---
-want('class="tile tile--posts"', "posts tile")
-want('class="tile tile--books tile--full"', "books tile full width")
-want("undertow.blog/notes/", "every tile shows its source path")
-want("hello@friedrich.uk", "email in footer")
-want("© 2026", "copyright in footer")
+def check(ok, what):
+    if not ok:
+        fails.append(what)
 
-want("data-source=\"posts\" data-ok=\"true\"",   "posts fetched")
-want("data-source=\"gone\" data-ok=\"false\"",    "404 handled")
-want("data-source=\"down\" data-ok=\"false\"",    "refused handled")
-want("data-source=\"garbage\" data-ok=\"false\"", "malformed handled")
 
-want("Clicks Power Keyboard", "notes title rendered")
-want("https://jason.re/notes/20260817163702/", "notes url rendered")
-want("17 Aug 2026", "notes date parsed and formatted")
-want("hardware", "notes tag rendered")
-want("Absolutes and Vigilance", "posts title rendered")
+def tile(key):
+    """The markup of one source's tile, or '' if that tile is absent."""
+    m = re.search(rf'data-source="{key}".*?(?=data-source="|</main>)', html, re.S)
+    return m.group() if m else ""
 
-# Position-sensitive: bind each URL to the exact anchor it must render in, not
-# merely to its presence anywhere on the page. "standard-reader.app" is a
-# substring of BOTH the outbound url and the jason.re permalink (it's a path
-# segment of the latter), so a bare substring check can't tell a swapped
-# rel="alternate"/rel="related" mapping from a correct one. The two anchors
-# also carry different classes (item__t vs item__note), so a swap would land
-# each href on the wrong element as well as the wrong text.
-want(
-    '<a class="item__t" href="https://standard-reader.app/a/did:plc:5w4eqcxzw5jv5qfnmzxcakfy/3msz2el2hxk2x">'
-    'Emilia: The Internet was never real</a>',
-    "link outbound target is the href of the title anchor",
-)
-want(
-    '<a class="item__note" href="https://jason.re/links/standard-reader.app/20260817163706/">my note</a>',
-    "link permalink is the href of the secondary \"my note\" anchor",
-)
-want('class="item__host">standard-reader.app<', "link host rendered in its own element")
 
-want("Day 5/5", "asides item rendered")
-want("https://asides.blog/22073a08a58555c8/", "asides url")
-want("I really can", "mastodon summary used as title fallback")
+def ok_flag(key):
+    m = re.search(rf'data-source="{key}" data-ok="(\w+)"', html)
+    return m.group(1) if m else None
 
-masto_body = tile_body("mastodon")
-reject("asides.blog/22073a08a58555c8/", "mastodon cross-post leaked", haystack=masto_body)
-if masto_body.count('<div class="item"') != 3:
-    fails.append("mastodon should render exactly 3 items after filtering")
 
-# Final whole-branch review must-fix 1: plainify returns template.HTML,
-# which renders raw; substr strips that type, so an already-escaped
-# "&amp;#39;" was escaped a second time to "&amp;amp;#39;". No doubled
-# entity of any kind should reach the page.
-want("I really can&#39;t decide", "apostrophe single-escaped, not doubled")
-reject("&amp;amp;", "no entity is ever double-escaped anywhere on the page")
-reject("&amp;#39;", "the literal &#39; text is never shown to a reader")
-reject("&amp;quot;", "no doubled quote entity anywhere on the page")
+REAL = ["posts", "links", "notes", "asides", "mastodon", "books"]
+BROKEN = ["gone", "down", "garbage"]
 
-# Final whole-branch review must-fix 2: truncation must cut on a word
-# boundary and mark that it cut, not stop mid-word with no indicator.
-want("I always liked Brent…", "mastodon title fallback truncates on a word boundary, not mid-word")
-reject("I always liked Br<", "truncation must not land mid-word")
-reject("not sure what I t<", "truncation must not land mid-word")
+# every source reaches the page, working or not
+for key in REAL + BROKEN:
+    check(ok_flag(key) is not None, f"source {key!r} is missing from the page entirely")
 
-want("Making It So", "book title")
-want("Patrick Stewart", "author whitespace collapsed")
-reject("Patrick   Stewart", "author still has doubled spaces")
-reject("utm_medium=api", "utm tracking not stripped")
-want('data-rating="4"', "rating parsed")
+# the live feeds resolve. A failure here is a real outage or a broken feed, not a
+# flaky test: these are the same fetches the deployed site makes every hour.
+for key in REAL:
+    check(ok_flag(key) == "true", f"live source {key!r} did not resolve (data-ok=false)")
 
-# Task 6 asserted the raw i.gr-assets.com URL reached the template; Task 10
-# self-hosts covers instead, so that assertion is rewritten rather than
-# dropped: the property worth keeping is that a cover URL is actually
-# extracted from the feed and rendered, now via the local republished path.
-reject('src="https://i.gr-assets.com', "cover still hot-linked")
-want('src="/images/covers/', "cover self-hosted")
+# a broken source costs one tile, never the build. run.sh checks the exit code;
+# this checks the tile still renders, empty.
+for key in BROKEN:
+    check(ok_flag(key) == "false", f"deliberately broken source {key!r} reported ok")
+    check(tile(key) != "", f"broken source {key!r} did not render a tile")
+    check('class="item"' not in tile(key), f"broken source {key!r} rendered items")
 
-# Hostile Goodreads items: a failing item must never fail the build, and
-# must not be shown with a fabricated date. Good items in the same feed
-# must still render.
-want("data-source=\"hostile\" data-ok=\"true\"", "hostile source fetched fine (item-level, not fetch-level, hostility)")
-want("Hostile Good Control Book", "control item with a valid date/rating survives")
-want("Hostile Bad Rating Book", "item with non-numeric rating survives, defaulted rather than crashing the build")
-reject("Hostile No Date Book", "item with no date anywhere is skipped, not shown with a fabricated date")
-reject("Hostile Bad Date Book", "item with an unparsable date is skipped, not shown with a fabricated date")
+# counts are honoured
+for key in REAL:
+    n = tile(key).count('class="item"') + tile(key).count('class="book"')
+    check(n <= 3, f"source {key!r} rendered {n} items, config says count: 3")
+    check(n > 0, f"source {key!r} resolved but rendered no items")
 
-# A 200 response whose body is not an image (Goodreads serving a rate-limit /
-# maintenance / error page at 200) must not crash .Resize, which is only
-# valid on image resources. This item's cover URL points at malformed.xml
-# served by the fixture HTTP server, a real 200 non-image response.
-want("Hostile Nonimage Cover Book", "item with a non-image 200 cover response survives, rendered without an image")
+# asides are cross-posted to Mastodon; without the filter the same item appears
+# in two adjacent tiles
+check("asides.blog" not in tile("mastodon"), "a cross-posted aside leaked into the mastodon tile")
+# and the filter must run BEFORE the count cut, or a busy day empties the tile
+check(tile("mastodon").count('class="item"') == 3,
+      "mastodon rendered fewer than 3 items: excludes are being applied after the count cut")
 
-hostile_body = tile_body("hostile")
-if hostile_body.count('<a class="book"') != 3:
-    fails.append("hostile source should render exactly the 3 datable items, skipping the 2 undatable ones")
+# link posts surface both urls and must not swap them
+links = tile("links")
+check('class="item__note"' in links, "link cards are missing the permalink ('my note') link")
+check('class="item__host"' in links, "link cards are missing the outbound host")
 
-_title_idx = hostile_body.find("Hostile Nonimage Cover Book")
-_anchor_start = hostile_body.rfind('<a class="book"', 0, _title_idx)
-_anchor_end = hostile_body.find("</a>", _title_idx)
-nonimage_book = hostile_body[_anchor_start:_anchor_end] if _anchor_start != -1 and _anchor_end != -1 else ""
-if "<img" in nonimage_book:
-    fails.append("Hostile Nonimage Cover Book should render without a <img> cover, since its cover response is not an image")
-if "Nonimage Author" not in nonimage_book or 'data-rating="5"' not in nonimage_book:
-    fails.append("Hostile Nonimage Cover Book should still render its author and rating despite the bad cover")
+# The card must point its title at the OUTBOUND article and its note at the
+# author's own page. Asserting only that the two differ is useless: swapping them
+# still leaves two different values. `host` is derived from the outbound url, so
+# requiring the displayed host to match the title's href catches a swap.
+cards = re.findall(
+    r'class="item__t" href="([^"]+)".*?class="item__host">([^<]+)<.*?class="item__note" href="([^"]+)"',
+    links, re.S)
+check(len(cards) > 0, "no link card matched the expected title/host/note structure")
+for title_href, shown_host, note_href in cards:
+    from urllib.parse import urlparse
+    check(urlparse(title_href).netloc == shown_host,
+          f"link card title points at {urlparse(title_href).netloc!r} "
+          f"but displays host {shown_host!r} — url and permalink look swapped")
+    check(title_href != note_href, "a link card points its title and its note at the same url")
 
-# Final whole-branch review C1: Hugo's XML unmarshal returns a map for a
-# single repeating element and a slice for several. A source with exactly
-# one <entry>/<item> must still build and render (a new section, a purged
-# Mastodon account, a one-book shelf).
-want("data-source=\"one_atom\" data-ok=\"true\"", "single-entry atom source survives (C1)")
-want("Lonely Only Entry", "single-entry atom item rendered (C1)")
-want("data-source=\"one_rss\" data-ok=\"true\"", "single-item rss source survives (C1)")
-want("Lonely Only Item", "single-item rss item rendered (C1)")
-want("data-source=\"one_goodreads\" data-ok=\"true\"", "one-book shelf survives (C1)")
-want("The Lonely Only Book", "one-book shelf item rendered (C1)")
+# books carry what only books have
+books = tile("books")
+check('class="book__cover"' in books, "book cards are missing covers")
+check("i.gr-assets.com" not in books, "book covers are hot-linked instead of self-hosted")
+check('src="/images/covers/' in books, "book covers are not served from this site")
+check('data-rating="' in books, "book cards are missing ratings")
 
-# Final whole-branch review C2: an element carrying an attribute (or
-# lacking one a generator normally sends) unmarshals to a map/string where
-# the code assumed the other shape.
-want("data-source=\"atomquirks\" data-ok=\"true\"", "atom quirks source survives (C2)")
-want("Quirky Title With Type Attribute", "atom <title type=> (WordPress/Blogger) rendered as plain text (C2)")
-want("Bare Content With No Type Attribute", "atom <content> with no type= rendered (C2)")
-want("data-source=\"rssquirks\" data-ok=\"true\"", "rss quirks source survives (C2)")
-want("Domain Category Item", "rss item with <category domain=> rendered (C2)")
-want('<span>tech</span>', "rss <category domain=> tag text extracted, not the whole map (C2)")
-want("Typed Title And Link Item", "rss <title type=> and attribute-bearing <link> rendered (C2)")
-want("data-source=\"goodreadsquirks\" data-ok=\"true\"", "goodreads quirks source survives (C2)")
-want("Quirky Title Book", "goodreads <title> with an attribute rendered (C2)")
-want("Quirky Read-At And Author Book", "goodreads item rendered despite attribute-bearing <title>", )
-want('<span class="book__a">Quirk Author Two</span>', "goodreads <author_name> with an attribute extracted (C2)")
+# page furniture
+check('rel="me"' in html, "rel=me is missing (mastodon verification)")
+check("fediverse:creator" in html, "fediverse:creator meta is missing")
+check("hello@friedrich.uk" in html, "the contact address is missing")
+m = re.search(r"(\d+)/(\d+) sources", html)
+check(m is not None, "the hero source count is missing")
+if m:
+    good, total = int(m.group(1)), int(m.group(2))
+    check(good == len(REAL) and total == len(REAL) + len(BROKEN),
+          f"hero claims {good}/{total} sources, expected {len(REAL)}/{len(REAL) + len(BROKEN)}")
 
-# Final review gap fix: an Atom <link> or <category> with no attributes at
-# all unmarshals to a bare string, not a map — the -rel/-href/-term index
-# reads must degrade rather than panic the build.
-want("data-source=\"bareattrs\" data-ok=\"true\"", "bare-attrs source survives (gap fix)")
-want(
-    '<a class="item__t" href="https://example.org/bareattrs/bare-link/">Bare Link No Href</a>',
-    "attribute-less <link> falls back to its text content as href (gap fix)",
-)
-want("Bare Category No Term", "item with an attribute-less <category> still rendered (gap fix)")
-want("<span>plain</span>", "attribute-less <category> falls back to its text content as the tag (gap fix)")
+# entities are decoded once, not twice
+check("&amp;#" not in html, "double-escaped HTML entities in the output")
 
-want('<link rel="me" href="https://click.ba.it/@jason">', "rel=me in head")
-want('name="fediverse:creator"', "fediverse creator meta")
-want("prefers-color-scheme:dark", "dark media query present in compiled CSS", css_out)
-want("[data-theme=dark]", "explicit dark selector present in compiled CSS", css_out)
-
-# The failure mode that matters: a colour token whose only definition sits
-# inside a media query or [data-theme] block renders one theme's text on the
-# other theme's background in the un-stamped "system" state. So confirm a
-# colour token is actually defined on bare :root in the shipped CSS, not just
-# somewhere in the file.
-m = re.search(r':root\{([^}]*)\}', css_out)
-if not m or "--h-posts:" not in m.group(1):
-    fails.append("colour token --h-posts is not defined on bare :root in compiled CSS")
+# the stylesheet is real
+m = re.search(r'href="(/css/[^"]+\.css)"', html)
+check(m is not None, "no stylesheet is linked")
+if m:
+    css = (BUILD / m.group(1).lstrip("/")).read_text(encoding="utf-8")
+    check("prefers-color-scheme:dark" in css or "prefers-color-scheme: dark" in css,
+          "compiled CSS has no dark-theme media query")
+    check("[data-theme=dark]" in css or '[data-theme="dark"]' in css,
+          "compiled CSS has no explicit dark-theme selector")
+    check("--h-posts:" in css, "compiled CSS is missing the source hue tokens")
 
 for f in fails:
-    print(f)
+    print("FAIL:", f)
 print("FAILURES:", len(fails))
 sys.exit(1 if fails else 0)

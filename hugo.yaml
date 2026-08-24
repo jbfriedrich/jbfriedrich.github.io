@@ -1,0 +1,110 @@
+baseURL: "https://friedrich.uk/"
+languageCode: "en-gb"
+title: "Jason Friedrich"
+disableKinds: ["taxonomy", "term", "section", "page", "RSS", "sitemap", "robotsTXT", "404"]
+
+module:
+  hugoVersion:
+    # min: `.Err` was removed in 0.141 and replaced by the `try` keyword, which
+    #      this site's feed-fetching partials rely on.
+    # max: Hugo 0.161.0 dropped support for the Tailwind standalone binary --
+    #      css.TailwindCSS now requires @tailwindcss/cli installed via npm as a
+    #      Node script, so Hugo can run it under `node --permission` and sandbox
+    #      its filesystem access (commit a54c398, issue #7287). Pinned below
+    #      0.161 to keep the single self-contained binary and no node_modules.
+    #      For the main project this only WARNS (exit 0); the hard failure lives
+    #      in layouts/partials/head.html.
+    min: "0.141.0"
+    max: "0.160.1"
+    extended: true
+
+caches:
+  getresource:
+    dir: ":cacheDir/:project"
+    # Just under the rebuild interval, so a scheduled rebuild normally serves
+    # from cache instead of hitting six third parties every hour.
+    maxAge: "55m"
+
+params:
+  author: "Jason Friedrich"
+  email: "hello@friedrich.uk"
+  tagline: "Websites, projects & social media"
+  bio: "Lefty, tech nerd, movie trivia hoarder and IT professional — I specialise in shaking my fist at clouds for a living. Everything I publish, in one place."
+  # channels (tiles) or signal (dense rows). Both read the same normalised data.
+  preset: "channels"
+  mastodon: "https://click.ba.it/@jason"
+  fediverseCreator: "@jason@click.ba.it"
+
+  # Every source is declared here: no hostname, feed URL or item count appears in
+  # a template, so moving a domain is a config edit.
+  #   kind      atom | rss | goodreads -- selects the branch in normalise.html
+  #   count     items shown on the page
+  #   overfetch items read before filtering, when excludes would otherwise eat
+  #             the whole count
+  #   excludes  drop items whose URL or summary contains any of these
+  #   full      render as a full-width tile
+  sources:
+    - key: posts
+      label: Posts
+      kind: atom
+      feed: "https://undertow.blog/posts/index.xml"
+      home: "https://undertow.blog/posts/"
+      count: 3
+      hue: posts
+
+    - key: links
+      label: Links
+      kind: atom
+      feed: "https://undertow.blog/links/index.xml"
+      home: "https://undertow.blog/links/"
+      count: 3
+      hue: links
+
+    - key: notes
+      label: Notes
+      kind: atom
+      feed: "https://undertow.blog/notes/index.xml"
+      home: "https://undertow.blog/notes/"
+      count: 3
+      hue: notes
+
+    - key: asides
+      label: Asides
+      kind: rss
+      feed: "https://asides.blog/rss/"
+      home: "https://asides.blog/"
+      count: 3
+      hue: asides
+
+    # Asides are cross-posted here, so the same item would appear twice on the
+    # page. Read a wider window, drop the cross-posts, then take count -- doing
+    # it the other way round empties the tile on a busy day.
+    - key: mastodon
+      label: Mastodon
+      kind: rss
+      feed: "https://click.ba.it/@jason.rss"
+      home: "https://click.ba.it/@jason"
+      count: 3
+      overfetch: 25
+      excludes: ["asides.blog"]
+      hue: masto
+
+    - key: books
+      label: Books
+      kind: goodreads
+      feed: "https://www.goodreads.com/review/list_rss/145074430?shelf=read"
+      home: "https://www.goodreads.com/jbfriedrich"
+      count: 3
+      hue: books
+      full: true
+
+  links:
+    - label: GitHub
+      url: "https://github.com/jbfriedrich"
+    - label: Mastodon
+      url: "https://click.ba.it/@jason"
+      me: true
+    - label: Instagram
+      url: "https://www.instagram.com/jbf.png/"
+    - label: LinkedIn
+      url: "https://www.linkedin.com/in/jbfriedrich"
