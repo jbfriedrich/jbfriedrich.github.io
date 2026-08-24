@@ -36,9 +36,11 @@ params:
   author: "Jason Friedrich"
   email: "hello@friedrich.uk"
   tagline: "Websites, projects & social media"
-  # Card image for link previews: a 1200x630 banner, the same one the wilde
-  # blogs ship. Kept in step by hand -- this site does not use that theme.
-  ogImage: "/images/og-feature-image.jpg"
+  # Card image for link previews, under assets/ so Hugo can measure it: the
+  # og:image dimensions and the card type are both read from the file, so
+  # replacing it with a different shape needs no other edit. Same image the
+  # wilde blogs ship, kept in step by hand -- this site does not use that theme.
+  ogImage: "images/og-feature-image.jpg"
   ogImageAlt: "Long-exposure neon light trails along a city street at night"
   bio: "Lefty, tech nerd, movie trivia hoarder and IT professional. I specialise in shaking my fist at clouds for a living. Everything I write on the Internet – all in one place."
   # Copy for a tile with nothing in it. A source that resolves and simply has

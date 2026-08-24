@@ -23,21 +23,31 @@
 
      The description is the bio rather than the tagline: a preview has room for
      a sentence, and the tagline is three words written to sit under a name. */}}
-{{- $ogImage := absURL .Site.Params.ogImage -}}
+{{/* Read from assets, not static, so the dimensions come from the file
+     itself. Declaring them by hand means they are a guess the moment the image
+     is replaced, and a consumer lays the card out from what it is told. The
+     card type follows the same measurement: a large card tells the consumer
+     the image is a banner, and it crops to fit if it is not. */}}
+{{- $card := resources.Get .Site.Params.ogImage -}}
+{{- $wide := and $card (ge (div (float $card.Width) $card.Height) 1.5) -}}
 <meta property="og:site_name" content="{{ .Site.Title }}">
 <meta property="og:locale" content="{{ replace .Site.LanguageCode "-us" "_US" }}">
 <meta property="og:type" content="website">
 <meta property="og:title" content="{{ .Site.Title }} · {{ .Site.Params.tagline }}">
 <meta property="og:description" content="{{ .Site.Params.bio }}">
 <meta property="og:url" content="{{ .Permalink }}">
-<meta property="og:image" content="{{ $ogImage }}">
-<meta property="og:image:alt" content="{{ .Site.Params.ogImageAlt }}">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
+{{- with $card }}
+<meta property="og:image" content="{{ .Permalink }}">
+<meta property="og:image:alt" content="{{ $.Site.Params.ogImageAlt }}">
+<meta property="og:image:width" content="{{ .Width }}">
+<meta property="og:image:height" content="{{ .Height }}">
+{{- end }}
+<meta name="twitter:card" content="{{ cond $wide "summary_large_image" "summary" }}">
 <meta name="twitter:title" content="{{ .Site.Title }} · {{ .Site.Params.tagline }}">
 <meta name="twitter:description" content="{{ .Site.Params.bio }}">
-<meta name="twitter:image" content="{{ $ogImage }}">
+{{- with $card }}
+<meta name="twitter:image" content="{{ .Permalink }}">
+{{- end }}
 <script>
   /* runs before first paint so the chosen theme never flashes */
   (function () {
