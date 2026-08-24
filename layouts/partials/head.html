@@ -1,3 +1,14 @@
+{{- /* Hard version ceiling. Hugo 0.161.0 dropped support for the Tailwind
+     STANDALONE binary: css.TailwindCSS now requires @tailwindcss/cli installed via
+     npm as a Node script, so Hugo can sandbox it with `node --permission`
+     (commit a54c398, issue #7287). We deliberately avoid the npm ecosystem, so this
+     site pins Hugo below 0.161. [module.hugoVersion] only WARNS for the main project
+     (exit 0), which blogdeploy would never surface -- it emails on non-zero exit only.
+     This errorf makes the mismatch fail the build with a legible reason instead of an
+     opaque "binary tailwindcss is not a Node.js script" at render time. */ -}}
+{{- if ge hugo.Version "0.161.0" -}}
+  {{- errorf "friedrich.uk requires Hugo < 0.161 (running %s): 0.161 dropped the Tailwind standalone binary and requires npm-installed @tailwindcss/cli. Pin Hugo to 0.160.1, or switch the CSS pipeline off css.TailwindCSS." hugo.Version -}}
+{{- end -}}
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{ .Site.Title }}</title>
