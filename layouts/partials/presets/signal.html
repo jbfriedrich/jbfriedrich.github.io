@@ -53,7 +53,7 @@
                falls through to tags and shows no empty star row. */}}
           <span class="whitespace-nowrap text-meta text-dim max-sm:hidden">
             {{- with .rating -}}
-              <span class="tracking-widest text-hue" data-rating="{{ . }}">{{ strings.Repeat . "★" }}</span>
+              {{ partial "rating.html" (dict "n" .) }}
             {{- else -}}
               {{ delimit (first 2 .tags) " · " }}
             {{- end -}}

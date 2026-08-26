@@ -160,6 +160,27 @@ check("i.gr-assets.com" not in books, "book covers are hot-linked instead of sel
 check('src="/images/covers/' in books, "book covers are not served from this site")
 check('data-rating="' in books, "book cards are missing ratings")
 
+
+# A rating shows the whole scale. Filled stars alone say "three", not "three
+# out of five" -- the reader has no way to know where the row stops, and a
+# five-star book and a three-star book differ only in a length nothing marks.
+def star_rows(markup):
+    """(claimed, total glyphs, filled glyphs) for every rating row."""
+    out = []
+    for m in re.finditer(r'data-rating="(\d)"[^>]*>(.*?)</span>\s*</span>', markup, re.S):
+        body = m.group(2)
+        lit = re.search(r"text-hue[^>]*>([^<]*)", body)
+        out.append((int(m.group(1)), body.count("\u2605"),
+                    lit.group(1).count("\u2605") if lit else 0))
+    return out
+
+
+rows = star_rows(books)
+check(rows, "no rating row found to inspect")
+for claimed, total, filled in rows:
+    check(total == 5, f"a {claimed}-star rating drew {total} stars, not the full scale of 5")
+    check(filled == claimed, f"a {claimed}-star rating drew {filled} filled stars")
+
 # A tile with nothing in it says which of the two reasons applies. Conflating
 # them tells a visitor the shelf is empty when the feed is actually down.
 for key in BROKEN:

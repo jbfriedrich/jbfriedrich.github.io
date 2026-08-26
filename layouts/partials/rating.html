@@ -1,0 +1,26 @@
+{{- /*
+  A 0-5 star row.
+
+  Both presets render ratings, so the scale lives here rather than being
+  written out twice and drifting apart.
+
+  The empty half of the scale uses the SAME ★ glyph as the filled half rather
+  than the outline ☆. Signal sets its rows in a monospace face, and ☆ is not in
+  every monospace font: where it is missing the browser substitutes from another
+  family, at another width, and the row stops lining up with the ones above it.
+  One glyph, two colours, one width, in either preset.
+
+  Those two colours are the hue and `dim` at 45%. The line colour was the first
+  choice and it measured about 1.2:1 against the tile in both themes -- present
+  in the markup, invisible on the page, which defeats the point of drawing the
+  empty half at all. Full `dim` goes the other way and competes with the filled
+  stars. The opacity modifier keeps the value on the palette instead of
+  introducing a sixth grey.
+
+  Params:
+    .n — the rating, 0-5 (normalise.html has already clamped it)
+
+  Returns: nothing; writes the row
+*/ -}}
+{{- $n := int (.n | default 0) -}}
+<span class="tracking-widest" data-rating="{{ $n }}"><span class="text-hue">{{ strings.Repeat $n "★" }}</span><span class="text-dim/45">{{ strings.Repeat (sub 5 $n) "★" }}</span></span>

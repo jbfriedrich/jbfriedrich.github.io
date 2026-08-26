@@ -94,6 +94,27 @@ ratings = re.findall(r'data-rating="(\d)"', section("books"))
 check(ratings, "no book in the read shelf rendered a rating")
 check(all(r != "0" for r in ratings), "a zero rating rendered an empty star row")
 
+
+# A rating shows the whole scale. Filled stars alone say "three", not "three
+# out of five" -- the reader has no way to know where the row stops, and a
+# five-star book and a three-star book differ only in a length nothing marks.
+def star_rows(markup):
+    """(claimed, total glyphs, filled glyphs) for every rating row."""
+    out = []
+    for m in re.finditer(r'data-rating="(\d)"[^>]*>(.*?)</span>\s*</span>', markup, re.S):
+        body = m.group(2)
+        lit = re.search(r"text-hue[^>]*>([^<]*)", body)
+        out.append((int(m.group(1)), body.count("\u2605"),
+                    lit.group(1).count("\u2605") if lit else 0))
+    return out
+
+
+rows = star_rows(section("books"))
+check(rows, "no rating row found to inspect")
+for claimed, total, filled in rows:
+    check(total == 5, f"a {claimed}-star rating drew {total} stars, not the full scale of 5")
+    check(filled == claimed, f"a {claimed}-star rating drew {filled} filled stars")
+
 # every source with a home page carries the same outbound affordance as channels
 homes = len(re.findall(r'      home: "', OVERLAY))
 check(len(re.findall("\u2197", html)) == homes,
