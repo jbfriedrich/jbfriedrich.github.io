@@ -55,9 +55,11 @@
 
     {{- $d := partial "safedate.html" (dict "value" $when "src" $src.key "title" $title) -}}
     {{- if $d.ok -}}
-      {{/* summary is truncated for display, but also feeds the excludes
-           filter in items.html:15 — it is not dead even where it is
-           never rendered */}}
+      {{/* .summary is cut to fit a card; .body is the whole thing, and is
+           what the excludes filter in items.html matches on. They cannot be
+           one field: matching the truncated string silently keeps any item
+           whose excluded URL sits past the cut. */}}
+      {{- $plain := htmlUnescape (plainify $body) -}}
       {{- $items = $items | append (dict
           "title"     $title
           "url"       $url
@@ -65,7 +67,8 @@
           "host"      $host
           "date"      $d.date
           "tags"      $tags
-          "summary"   (partial "truncate.html" (dict "s" (htmlUnescape (plainify $body)) "n" 180))
+          "body"      $plain
+          "summary"   (partial "truncate.html" (dict "s" $plain "n" 180))
           "image"     ""
           "rating"    0) -}}
     {{- end -}}
@@ -88,9 +91,11 @@
 
     {{- $d := partial "safedate.html" (dict "value" (partial "rawstring.html" (dict "value" $i.pubDate)) "src" $src.key "title" $title) -}}
     {{- if $d.ok -}}
-      {{/* summary is truncated for display, but also feeds the excludes
-           filter in items.html:15 — it is not dead even where it is
-           never rendered */}}
+      {{/* .summary is cut to fit a card; .body is the whole thing, and is
+           what the excludes filter in items.html matches on. A Mastodon
+           cross-post carries its asides.blog link AFTER the prose, so on a
+           long post that link falls past the cut -- matching the truncated
+           string kept the item and put it on the page twice. */}}
       {{- $items = $items | append (dict
           "title"     $title
           "url"       (partial "rawstring.html" (dict "value" $i.link))
@@ -98,6 +103,7 @@
           "host"      ""
           "date"      $d.date
           "tags"      $tags
+          "body"      $body
           "summary"   (partial "truncate.html" (dict "s" $body "n" 180))
           "image"     ""
           "rating"    0) -}}
@@ -143,6 +149,7 @@
           "host"      ""
           "date"      $d.date
           "tags"      slice
+          "body"      $author
           "summary"   $author
           "image"     (partial "rawstring.html" (dict "value" $i.book_large_image_url))
           "rating"    $rating) -}}

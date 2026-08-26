@@ -9,6 +9,8 @@ Reads the build output from the directory given as the first argument.
 import pathlib
 import re
 import sys
+import urllib.request
+from html import unescape
 from urllib.parse import urlparse
 
 BUILD = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "public_test")
@@ -79,12 +81,44 @@ for key in REAL:
         check(n > 0, f"source {key!r} resolved but rendered no items")
 
 # asides are cross-posted to Mastodon; without the filter the same item appears
-# in two adjacent tiles
-check("asides.blog" not in tile("mastodon"), "a cross-posted aside leaked into the mastodon tile")
-# and the filter must run BEFORE the count cut, or a busy day empties the tile
-check(len(re.findall(r"data-item[ >]", tile("mastodon"))) == counts["mastodon"],
-      "mastodon rendered fewer items than its count: "
-      "excludes are being applied after the count cut")
+# in two adjacent tiles.
+#
+# Asserting that "asides.blog" is absent from the tile's markup does NOT test
+# this. The tile renders a truncated body, so a cross-post whose link sits past
+# the cut renders no "asides.blog" anywhere and the leak goes unnoticed -- which
+# is exactly the bug that shipped. The item has to be traced back to the feed
+# entry it came from and THAT judged, whole.
+MASTO_FEED = re.search(r"- key: mastodon\n(?:.*\n)*?      feed: \"([^\"]+)\"", CONFIG).group(1)
+MASTO_EXCLUDES = re.findall(
+    r"[\"']([^\"']+)[\"']",
+    re.search(r"- key: mastodon\n(?:.*\n)*?      excludes: \[([^\]]*)\]", CONFIG).group(1))
+
+req = urllib.request.Request(MASTO_FEED, headers={"Accept-Encoding": "identity"})
+feed = urllib.request.urlopen(req, timeout=30).read().decode("utf-8")
+
+# the same shape normalise.html produces: tags stripped, entities resolved and
+# NOT truncated. Hugo's plainify inserts a newline at block boundaries where a
+# regex strip does not, so both sides are compared with whitespace removed.
+def flat(s):
+    return re.sub(r"\s+", "", unescape(re.sub(r"<[^>]+>", "", unescape(s))))
+
+
+bodies = [flat(m.group(1)) for it in re.findall(r"<item>(.*?)</item>", feed, re.S)
+          if (m := re.search(r"<description>(.*?)</description>", it, re.S))]
+
+rendered = [flat(t).rstrip("\u2026")
+            for t in re.findall(r"data-item-title[^>]*>(.*?)</a>", tile("mastodon"), re.S)]
+check(rendered, "no mastodon items rendered, so the excludes filter is untested")
+
+for shown in rendered:
+    origin = [b for b in bodies if b.startswith(shown)]
+    check(origin, f"rendered mastodon item {shown[:40]!r} matches no entry in the feed")
+    for b in origin:
+        for pat in MASTO_EXCLUDES:
+            check(flat(pat) not in b,
+                  f"a cross-posted aside leaked into the mastodon tile: "
+                  f"{shown[:40]!r} came from a feed entry containing {pat!r}, "
+                  f"past the point the summary is truncated")
 
 # link posts surface both urls and must not swap them
 links = tile("links")

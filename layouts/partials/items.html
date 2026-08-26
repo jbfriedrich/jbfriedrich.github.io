@@ -11,11 +11,13 @@
   {{- $kept := slice -}}
   {{- range $it := $all -}}
     {{- $drop := false -}}
-    {{/* .summary is truncated for display, but it is also matched here,
-         so it is never fully "dead" even for sources that never render
-         it (e.g. Mastodon posts that merely cross-post from asides.blog) */}}
+    {{/* .body, NOT .summary: .summary is cut to 180 runes for display, and a
+         Mastodon cross-post puts its asides.blog link after the prose, so on a
+         long post the link falls past the cut. Matching the display string let
+         those items through -- and left no trace of the excluded pattern in the
+         markup either, so a test asserting on the rendered tile passed. */}}
     {{- range $pat := ($src.excludes | default slice) -}}
-      {{- if or (in $it.url $pat) (in $it.summary $pat) -}}
+      {{- if or (in $it.url $pat) (in $it.body $pat) -}}
         {{- $drop = true -}}
       {{- end -}}
     {{- end -}}
