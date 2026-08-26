@@ -7,9 +7,23 @@
         <span class="size-2.5 shrink-0 rounded-full bg-hue"></span>
         <span class="text-meta uppercase tracking-widest text-hue">{{ $src.label }}</span>
         {{ with $src.home }}
-          <a class="ml-auto text-meta text-dim no-underline hover:text-hue" href="{{ . }}" target="_blank" rel="noopener">{{ replaceRE `^https?://` "" . }}</a>
+          <a class="ml-auto text-meta text-dim no-underline hover:text-hue" href="{{ . }}" target="_blank" rel="noopener">{{ replaceRE `^https?://` "" . }} ↗</a>
         {{ end }}
       </div>
+      {{/* A section is never a bare coloured band. Without this, a shelf that
+           emptied, a feed that was down and a source that had not been written
+           yet all rendered the same nothing. Left-aligned on the row grid
+           rather than centred as in channels: here it reads as a row saying
+           there is nothing, which is what a dense list wants. */}}
+      {{ if not $r.items }}
+        <p class="border-t border-line px-loose py-snug text-meta text-dim" data-empty>
+          {{- if $r.ok -}}
+            {{ $src.empty | default $.Site.Params.emptyText }}
+          {{- else -}}
+            {{ $.Site.Params.unavailableText }}
+          {{- end -}}
+        </p>
+      {{ end }}
       {{ range $r.items }}
         {{/* Same rule as the channels preset: where there is a write-up of the
              link, the row goes to it. The row is itself the anchor, so the
@@ -19,8 +33,31 @@
            data-row target="_blank" rel="noopener"
            href="{{ with .permalink }}{{ . }}{{ else }}{{ .url }}{{ end }}">
           <span class="text-meta text-dim">{{ .date.Format "2006-01-02" }}</span>
-          <span class="min-w-0 truncate">{{ .title }}{{ with .host }} → <span class="font-semibold text-hue">{{ . }}</span>{{ end }}</span>
-          <span class="whitespace-nowrap text-meta text-dim max-sm:hidden">{{ delimit (first 2 .tags) " · " }}</span>
+          {{/* Title and second line stack, because they compete for the same
+               space otherwise: on one line the title truncates first and eats
+               the domain, which is the half that says where the row leads.
+               Hue for a domain, dim for an author -- one names a destination,
+               the other describes the thing. Same split channels makes. */}}
+          <span class="flex min-w-0 flex-col gap-1.25">
+            <span class="min-w-0 truncate" data-row-title>{{ .title }}</span>
+            {{ if .image }}
+              <span class="min-w-0 truncate text-meta text-dim" data-row-author>{{ .summary }}</span>
+            {{ else }}{{ with .host }}
+              <span class="min-w-0 truncate text-meta font-semibold text-hue" data-row-host>{{ . }}</span>
+            {{ end }}{{ end }}
+          </span>
+          {{/* The trailing column is whatever metadata the source actually has.
+               A book carries no tags and a post carries no rating, so they take
+               turns rather than each leaving a hole. An unrated book (the
+               currently-reading shelf, or anything Goodreads reports as 0)
+               falls through to tags and shows no empty star row. */}}
+          <span class="whitespace-nowrap text-meta text-dim max-sm:hidden">
+            {{- with .rating -}}
+              <span class="tracking-widest text-hue" data-rating="{{ . }}">{{ strings.Repeat . "★" }}</span>
+            {{- else -}}
+              {{ delimit (first 2 .tags) " · " }}
+            {{- end -}}
+          </span>
         </a>
       {{ end }}
     </section>
