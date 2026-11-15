@@ -134,9 +134,9 @@ check("my note" not in links,
 # the two and the domain label no longer matches the domain it links to.
 #
 # The title is only required to lead somewhere else. It cannot be pinned to the
-# blog's own hostname, because the permalink comes from undertow.blog's Atom
-# feed and that feed still carries an older baseURL -- which is a setting on
-# that site, not something this one should second-guess or rewrite.
+# blog's own hostname, because the permalink comes from the blog's Atom feed and
+# carries whatever baseURL that site was built with -- a setting on that site,
+# not something this one should second-guess or rewrite.
 # Attributes after href are tolerated on purpose: target= and rel= sit on both
 # of these anchors, and their order is not something a test should pin.
 cards = re.findall(
