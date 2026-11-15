@@ -144,8 +144,6 @@ params:
     - label: Mastodon
       url: "https://click.ba.it/@jason"
       me: true
-    - label: Instagram
-      url: "https://www.instagram.com/jbf.png/"
     - label: GitHub
       url: "https://github.com/jbfriedrich"
     - label: LinkedIn
