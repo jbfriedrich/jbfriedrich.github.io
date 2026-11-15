@@ -1,8 +1,9 @@
 # friedrich.uk
 
 Landing page for friedrich.uk. It aggregates content already published elsewhere —
-blog posts, links, notes, status posts, Mastodon and a Goodreads shelf — and links back
-to each source. Nothing is authored here.
+blog posts, links and notes from [jason.re](https://jason.re), status posts from
+asides.blog, Mastodon and two Goodreads shelves — and links back to each source. Nothing
+is authored here.
 
 Built with Hugo. Feeds are fetched and parsed at build time, so the published site is
 static: no JavaScript fetches anything, and no visitor request reaches a third party.
@@ -23,8 +24,9 @@ PATH="$PWD/bin:$PATH" hugo
 
 Output lands in `public/`. For a local preview use `hugo server`.
 
-The deployed site is built and published by `blogdeploy` on a schedule, because its
-content changes when other people publish, not when this repository changes.
+The deployed site is built and published by `blogdeploy` on the self-hosted build host,
+on an hourly schedule, because its content changes when other people publish, not when
+this repository changes.
 
 ## Configuration
 
@@ -35,7 +37,7 @@ Each entry under `params.sources` describes one source:
 
 | Key | Meaning |
 |---|---|
-| `key` | Identifier, used for the tile's hue and its `data-source` attribute |
+| `key` | Identifier, rendered as the tile's `data-source` attribute (the test hook) |
 | `label` | Heading shown on the tile |
 | `kind` | `atom`, `rss` or `goodreads` — selects the branch in `normalise.html` |
 | `feed` | Feed URL |
@@ -45,18 +47,26 @@ Each entry under `params.sources` describes one source:
 | `overfetch` | Items to read before filtering, when `excludes` would otherwise eat the count |
 | `excludes` | Drop items whose URL or summary contains any of these strings |
 | `span` | Tile width in columns of the six-column mosaic |
-| `hue` | Colour token for the tile |
+| `hue` | Colour for the tile: selects the `.hue--<hue>` class in `assets/css/main.css` |
 | `full` | Render the tile body as a cover grid (books) |
 
-Adding a source is a new entry plus a hue in `assets/css/main.css`.
+Adding a source is a new entry plus, if it needs its own colour, a hue in
+`assets/css/main.css`. Sources may share a hue: both Goodreads shelves use `books`.
+
+`kind` names the **shape of the feed**, not what the source means. Two Goodreads
+shelves — read and currently-reading — are the same XML and share `kind: goodreads`;
+they differ in `key`, `label` and `feed`. A new `kind` is only warranted when a feed
+parses differently, because each one is another branch in `normalise.html` to keep
+working.
 
 ### Spans
 
 The mosaic is six columns wide and each source sets its own `span`. The spans of the
 sources sharing a row have to add up to six, or the row ends in an empty half — so `span`
 is a layout decision made next to the source rather than derived from item counts. The
-current arrangement is `2 2 2 / 3 3 / 6`: three narrow tiles, then the two text-heavy
-sources that need the width, then the shelf.
+current arrangement is `2 2 2 / 3 3 / 2 4`: three narrow tiles (posts, notes, links),
+then the two text-heavy sources that need the width (asides, Mastodon), then the
+currently-reading shelf beside the last-read shelf.
 
 Tablet widths are derived, not configured: a source of three columns or more takes the
 full width, narrow ones pair up, and an odd one left over takes the full width too
@@ -77,12 +87,6 @@ Testing this needs a source that is reliably empty, which a live shelf is not �
 being empty the moment something lands on it. The suite uses a real feed with an
 `excludes` rule that filters every item away.
 
-`kind` names the **shape of the feed**, not what the source means. Two Goodreads
-shelves — read and currently-reading — are the same XML and share `kind: goodreads`;
-they differ in `key`, `label` and `feed`. A new `kind` is only warranted when a feed
-parses differently, because each one is another branch in `normalise.html` to keep
-working.
-
 ### Presets
 
 `params.preset` selects the layout: `channels` (tiles) or `signal` (dense rows). Both
@@ -91,8 +95,10 @@ fetching or filtering logic.
 
 ## CSS
 
-The templates are styled with Tailwind utilities. `assets/css/main.css` holds no
-component rules: it declares the theme and the six source hues, and that is all.
+The templates are styled with Tailwind utilities. `assets/css/main.css` declares the
+theme and the six source hues; its only component rules are the six `.hue--<hue>`
+classes that point a tile's `text-hue` and `bg-tint` at its source's colour (see
+[Theme tokens](#theme-tokens)).
 
 ### The @source path
 
@@ -220,14 +226,20 @@ Mastodon tile, link cards point their title at the write-up and their domain lab
 outbound article, no mosaic row is left short, book covers are self-hosted, entities are
 decoded once.
 
+`tests/hugo.test.yaml` is merged over `hugo.yaml`. A YAML list replaces rather than
+merges, so it repeats the real sources from `hugo.yaml` — edit both when a source
+changes. It then adds three sources that are meant to fail — one per failure mode — so
+the guarantee above stays covered, and one that resolves with nothing left after
+filtering. It also disables the resource cache so each run performs the fetches it
+claims to.
+
 The suite builds three times: both presets from the project root, and once in the shape
 blogdeploy uses — `--gc --minify --source`, started from a different working directory.
 Only the third proves the stylesheet that ships has any rules in it, and `--minify`
 drops optional attribute quotes, so its assertions do not assume `attr="value"`.
 
-`tests/hugo.test.yaml` is merged over `hugo.yaml` and adds three sources that are meant to
-fail — one per failure mode — so the guarantee above stays covered. It also disables the
-resource cache so each run performs the fetches it claims to.
+`run.sh` stops at the first stage that fails, so a failure in the channels build hides
+the results of the other two.
 
 ## Hugo version
 
@@ -254,10 +266,14 @@ opaque `binary "tailwindcss" is not a Node.js script`.
 | `layouts/partials/` | Fetch, normalise and render |
 | `layouts/partials/presets/` | `channels.html`, `signal.html` |
 | `assets/css/main.css` | Tailwind entry, design tokens, layout |
+| `assets/images/` | The link-preview card image (`params.ogImage`) |
 | `static/` | Favicons, avatar, `robots.txt`, the WebFinger document |
 | `scripts/get-tailwind.sh` | Fetches the pinned Tailwind binary |
 | `tests/` | Live test suite and its config overlay |
+| `docs/todo.md` | Every open task |
+| `AGENTS.md` | Rules for agents working in this repository |
+| `docs/decisions.md` | Design choices not explained in this README, and what was rejected |
 
 `static/.well-known/webfinger/index.json` makes `jason@friedrich.uk` resolve to the
 Mastodon account. Serving it needs a rewrite rule, because the request has no file
-extension — see the deployment Caddyfile.
+extension — see the `friedrich.uk` block in blogdeploy's `caddy/Caddyfile`.
