@@ -88,11 +88,14 @@
                    currently-reading book was left above a gap. Now every card
                    in the row has the same frame whatever the title does. */}}
               <span class="flex min-w-0 flex-col gap-1.25 self-stretch">
-                {{/* The main title only: Goodreads titles carry the full
-                     subtitle ("… : A Counterintuitive Approach to Living a Good
-                     Life"). At most three lines, cut by the browser at the line
-                     end; the full title is the tooltip. */}}
-                <span class="line-clamp-3 font-semibold" title="{{ .title }}">{{ replaceRE `:\s.*$` "" .title }}</span>
+                {{/* The whole title, cut by the browser after three lines with an
+                     ellipsis, so a cut is always visible and the full title is
+                     the tooltip. Not cut at the colon: Goodreads titles carry
+                     their subtitle ("…: A Counterintuitive Approach to Living a
+                     Good Life"), but a colon can belong to the title itself.
+                     Unclamped, that subtitle made one card seven lines tall and
+                     every card in its row with it. */}}
+                <span class="line-clamp-3 font-semibold" data-book-title title="{{ .title }}">{{ .title }}</span>
                 <span class="text-meta text-dim">{{ .summary }}</span>
                 {{/* A book on the currently-reading shelf has no rating yet, and
                      Goodreads reports 0 for anything unrated. An empty star row
