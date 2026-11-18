@@ -160,6 +160,14 @@ check("i.gr-assets.com" not in books, "book covers are hot-linked instead of sel
 check('src="/images/covers/' in books, "book covers are not served from this site")
 check('data-rating="' in books, "book cards are missing ratings")
 
+# The shelf arrives as one escaped JavaScript string from Goodreads' widget and is
+# decoded in source.html. An escape it misses, or HTML escaped twice, shows up
+# in the titles first.
+check(len(re.findall(r"\sdata-book\s", books)) == 3, "the read shelf did not render exactly 3 books")
+for t in re.findall(r'<span class="font-semibold">([^<]*)</span>', books + tile("reading")):
+    check("\\" not in t and "&amp;amp;" not in t and "&amp;#" not in t,
+          f"book title {t[:40]!r} still carries widget escapes")
+
 
 # A rating shows the whole scale. Filled stars alone say "three", not "three
 # out of five" -- the reader has no way to know where the row stops, and a

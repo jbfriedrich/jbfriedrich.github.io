@@ -68,8 +68,8 @@ params:
 
     - key: reading
       label: Currently reading
-      kind: goodreads
-      feed: "https://www.goodreads.com/review/list_rss/145074430?shelf=currently-reading"
+      kind: goodreads-widget
+      feed: "https://www.goodreads.com/review/custom_widget/145074430?shelf=currently-reading&num_books=3&sort=date_added&order=d"
       empty: "Not reading anything at the moment"
       count: 1
       span: 2
@@ -78,8 +78,8 @@ params:
 
     - key: books
       label: Last read
-      kind: goodreads
-      feed: "https://www.goodreads.com/review/list_rss/145074430?shelf=read"
+      kind: goodreads-widget
+      feed: "https://www.goodreads.com/review/custom_widget/145074430?shelf=read&num_books=3&sort=date_read&order=d"
       home: "https://www.goodreads.com/jbfriedrich"
       count: 3
       span: 4

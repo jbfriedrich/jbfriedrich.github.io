@@ -111,48 +111,52 @@
   {{- end -}}
 {{- end -}}
 
-{{- if eq $src.kind "goodreads" -}}
-  {{- range $i := (partial "rawlist.html" (dict "value" $data.channel.item)) -}}
-    {{- $link := partial "rawstring.html" (dict "value" $i.link) -}}
-    {{- $link = replaceRE `\?utm_medium=api&utm_source=rss` "" $link -}}
-
-    {{- $title := partial "rawstring.html" (dict "value" $i.title) -}}
-
-    {{/* user_read_at is empty on some entries; fall back to pubDate */}}
-    {{- $when := partial "rawstring.html" (dict "value" $i.user_read_at) -}}
-    {{- if not $when -}}{{- $when = partial "rawstring.html" (dict "value" $i.pubDate) -}}{{- end -}}
-
-    {{- $author := replaceRE `\s+` " " (partial "rawstring.html" (dict "value" $i.author_name)) -}}
-
-    {{/* user_rating is normally a small int, but never trust a feed:
-         a non-numeric value (e.g. "N/A") would panic a bare `int` call.
-         Fall back to 0 and clamp to the 0-5 star range. */}}
-    {{- $rating := 0 -}}
-    {{- with try (int (partial "rawstring.html" (dict "value" $i.user_rating) | default "0")) -}}
-      {{- with .Err -}}
-        {{- warnf "friedrich: source %q item %q has non-numeric rating %q; defaulting to 0" $src.key $title (partial "rawstring.html" (dict "value" $i.user_rating)) -}}
-      {{- else -}}
-        {{- $rating = .Value -}}
-      {{- end -}}
+{{- if eq $src.kind "goodreads-widget" -}}
+  {{/* $data is the widget's decoded HTML (source.html): one
+       gr_custom_each_container_<id> block per book, in the shelf's sort order,
+       after a header block that is dropped. The widget has no dates at all, so
+       date is nil and the presets leave it out. The rating is the reader's own:
+       one star_active image per star, none for an unrated book. */}}
+  {{- range $blk := after 1 (split $data "gr_custom_each_container") -}}
+    {{- $link := "" -}}
+    {{- $title := "" -}}
+    {{- with findRESubmatch `gr_custom_title[^"]*">\s*<a[^>]*href="([^"?]+)[^"]*"[^>]*>([^<]*)</a>` $blk 1 -}}
+      {{- $link = index . 0 1 -}}
+      {{- $title = index . 0 2 | htmlUnescape | replaceRE `\s+` " " | strings.TrimSpace -}}
     {{- end -}}
-    {{- if lt $rating 0 -}}{{- $rating = 0 -}}{{- end -}}
+
+    {{- $author := "" -}}
+    {{- with findRESubmatch `gr_custom_author[^"]*">\s*by\s*<a[^>]*>([^<]*)</a>` $blk 1 -}}
+      {{- $author = index . 0 1 | htmlUnescape | replaceRE `\s+` " " | strings.TrimSpace -}}
+    {{- end -}}
+
+    {{/* The widget's thumbnail is tiny ("…/62032._SY75_.jpg"). The size suffix
+         asks Goodreads' image server for a rendition, so swap it for 272px wide:
+         twice the 136px the channels card resizes to. Not the bare original:
+         those run to megabytes, and some are PNGs served as image/jpeg, which
+         GetRemote rightly refuses. */}}
+    {{- $image := "" -}}
+    {{- with findRESubmatch `<img[^>]*\ssrc="([^"]+)"` $blk 1 -}}
+      {{- $image = index . 0 1 | replaceRE `\._S[XY]\d+_\.` "._SX272_." -}}
+    {{- end -}}
+
+    {{- $rating := len (findRE `star_active` $blk) -}}
     {{- if gt $rating 5 -}}{{- $rating = 5 -}}{{- end -}}
 
-    {{- $d := partial "safedate.html" (dict "value" $when "src" $src.key "title" $title) -}}
-    {{- if $d.ok -}}
-      {{/* spec calls for book_large_image_url: book_medium_image_url is
-           a 98px-wide thumbnail, a 39% upscale on the full-width tile */}}
+    {{- if and $link $title -}}
       {{- $items = $items | append (dict
           "title"     $title
           "url"       $link
           "permalink" ""
           "host"      ""
-          "date"      $d.date
+          "date"      nil
           "tags"      slice
           "body"      $author
           "summary"   $author
-          "image"     (partial "rawstring.html" (dict "value" $i.book_large_image_url))
+          "image"     $image
           "rating"    $rating) -}}
+    {{- else -}}
+      {{- warnf "friedrich: source %q has a widget entry without a title link; skipped" $src.key -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}

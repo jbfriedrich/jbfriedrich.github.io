@@ -94,6 +94,14 @@ ratings = re.findall(r'data-rating="(\d)"', section("books"))
 check(ratings, "no book in the read shelf rendered a rating")
 check(all(r != "0" for r in ratings), "a zero rating rendered an empty star row")
 
+# Goodreads' widget carries no dates, so a book row leaves its date cell empty
+# instead of printing the zero time.
+check("0001-01-01" not in html, "an item without a date printed the zero time")
+book_dates = re.findall(r'data-row\s[^>]*>\s*<span class="text-meta text-dim">([^<]*)</span>',
+                        section("books"))
+check(book_dates and all(not d.strip() for d in book_dates),
+      f"book rows should have an empty date cell, found {book_dates!r}")
+
 
 # A rating shows the whole scale. Filled stars alone say "three", not "three
 # out of five" -- the reader has no way to know where the row stops, and a

@@ -7,17 +7,43 @@
      response sidesteps a whole class of upstream compression bugs; these feeds are tens
      of kilobytes, so the bandwidth is irrelevant. */}}
 {{- $opts := dict "headers" (dict "Accept-Encoding" "identity") -}}
-{{- with try (resources.GetRemote $src.feed $opts) -}}
+{{- $url := $src.feed -}}
+{{/* Goodreads caches a widget's output per widget_id alone, whatever the shelf
+     or sort: a fixed id would serve a stale shelf indefinitely, and two sources
+     sharing an id get the same shelf. So the id carries the source key and the
+     hour: fresh every hour, stable within it so the getresource cache holds. */}}
+{{- $widget := eq $src.kind "goodreads-widget" -}}
+{{- if $widget -}}
+  {{- $url = printf "%s&widget_id=frd%s%s" $url $src.key (now.Format "2006010215") -}}
+{{- end -}}
+{{- with try (resources.GetRemote $url $opts) -}}
   {{- with .Err -}}
     {{- warnf "friedrich: source %q unreachable: %s" $src.key . -}}
   {{- else -}}
     {{/* a 404 returns NO error and a nil value — this branch is why */}}
     {{- with .Value -}}
-      {{- with try (transform.Unmarshal .) -}}
-        {{- with .Err -}}
-          {{- warnf "friedrich: source %q did not parse: %s" $src.key . -}}
+      {{- if $widget -}}
+        {{/* Not a feed: JavaScript holding the shelf as one escaped HTML string,
+             var widget_code = '…'. Take the literal and undo its escapes here, so
+             a widget whose markup changed fails as an unavailable source rather
+             than passing as an empty shelf. */}}
+        {{- with findRESubmatch `var widget_code = '((?:[^'\\]|\\.)*)'` .Content 1 -}}
+          {{- $html := index . 0 1 -}}
+          {{- $html = replace $html `\"` `"` -}}
+          {{- $html = replace $html `\/` `/` -}}
+          {{- $html = replace $html `\'` `'` -}}
+          {{- $html = replace $html `\n` "\n" -}}
+          {{- $out = dict "ok" true "data" $html -}}
         {{- else -}}
-          {{- $out = dict "ok" true "data" .Value -}}
+          {{- warnf "friedrich: source %q is not a Goodreads widget any more (no widget_code)" $src.key -}}
+        {{- end -}}
+      {{- else -}}
+        {{- with try (transform.Unmarshal .) -}}
+          {{- with .Err -}}
+            {{- warnf "friedrich: source %q did not parse: %s" $src.key . -}}
+          {{- else -}}
+            {{- $out = dict "ok" true "data" .Value -}}
+          {{- end -}}
         {{- end -}}
       {{- end -}}
     {{- else -}}

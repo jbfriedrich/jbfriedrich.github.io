@@ -5,16 +5,6 @@ delete it and put what is now true into its home (README, `docs/decisions.md`, c
 
 ## Open
 
-- [ ] **Replace the two Goodreads sources** (added 2026-11-15) — Goodreads discontinued its RSS
-  feeds (see the jason.re post "Reading a Goodreads shelf without the RSS feeds", 2026-11-14).
-  `https://www.goodreads.com/review/list_rss/145074430?shelf=read` and `?shelf=currently-reading`
-  return 404, so the `reading` and `books` tiles render as unavailable: the live page reported
-  `5/7 sources` on 2026-11-15. `./tests/run.sh` fails on them too — 8 assertions in the channels
-  build, 7 in the signal build. Swap the `feed` of both sources in `hugo.yaml` and
-  `tests/hugo.test.yaml` for whatever replaces the feed; if the replacement is not an RSS feed
-  of the same shape, that is a new `kind` in `partials/normalise.html`, or a change to
-  `partials/source.html` (the one file that talks to the network). Done when `./tests/run.sh`
-  passes all three stages.
 - [ ] **Confirm the blog tiles link to jason.re** (added 2026-11-15) — the jason.re repo's
   `baseURL` is `https://jason.re` since 2026-11-14, but on 2026-11-15 the live jason.re feeds
   still emitted `https://undertow.blog/...` permalinks, and the live hub linked to them;

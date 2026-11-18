@@ -47,3 +47,26 @@ colours — a green and a teal 52° apart read as the same colour.
 
 The design spec planned a test suite against recorded copies of the six feeds. The suite fetches
 the live feeds instead; the reasoning is in the README ([Tests](../README.md#tests)).
+
+## Goodreads shelves come from the public widget (2026-11-18)
+
+Goodreads switched off its RSS feeds in October 2026, so both book tiles lost their source.
+The shelves are now read from Goodreads' public custom widget at build time, by Hugo, in the
+same pipeline as every other source: `source.html` decodes it, a `goodreads-widget` branch in
+`normalise.html` parses it. The widget, the profile page and the GraphQL API behind book pages
+were found while building goodreads-nextread-random (see the jason.re post *Reading a Goodreads
+shelf without the RSS feeds*, 2026-11-14).
+
+Rejected:
+- **Extending goodreads-nextread-random to serve a feed.** Its parser is sturdier and tested,
+  but the public site would then depend on a self-hosted container, and that tool reads only
+  one shelf.
+- **A collector that writes the shelves to files before the build.** Same reasoning as
+  [A failed source shows as missing, not stale](#a-failed-source-shows-as-missing-not-stale-2026-08).
+
+Costs, accepted:
+- **No dates.** The widget has none, so book items carry no date.
+- **Pattern matching instead of a parser.** Goodreads can change the markup at any time. If it
+  does, the tile shows "unavailable"; the build never fails.
+- **Requests.** Two widget requests per hourly build, about 50 a day, plus a cover only when it
+  isn't cached.

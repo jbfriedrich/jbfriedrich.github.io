@@ -39,8 +39,8 @@ Each entry under `params.sources` describes one source:
 |---|---|
 | `key` | Identifier, rendered as the tile's `data-source` attribute (the test hook) |
 | `label` | Heading shown on the tile |
-| `kind` | `atom`, `rss` or `goodreads` — selects the branch in `normalise.html` |
-| `feed` | Feed URL |
+| `kind` | `atom`, `rss` or `goodreads-widget` — selects the branch in `normalise.html` |
+| `feed` | Feed URL; for `goodreads-widget`, the shelf's widget URL (below) |
 | `home` | Where the tile heading links. Optional: omit it and the heading shows no link |
 | `count` | Items to display |
 | `empty` | What the tile says when the source resolves with no items, overriding `params.emptyText` |
@@ -54,10 +54,28 @@ Adding a source is a new entry plus, if it needs its own colour, a hue in
 `assets/css/main.css`. Sources may share a hue: both Goodreads shelves use `books`.
 
 `kind` names the **shape of the feed**, not what the source means. Two Goodreads
-shelves — read and currently-reading — are the same XML and share `kind: goodreads`;
-they differ in `key`, `label` and `feed`. A new `kind` is only warranted when a feed
-parses differently, because each one is another branch in `normalise.html` to keep
-working.
+shelves — read and currently-reading — have the same shape and share
+`kind: goodreads-widget`; they differ in `key`, `label` and `feed`. A new `kind` is only
+warranted when a feed parses differently, because each one is another branch in
+`normalise.html` to keep working.
+
+### Goodreads shelves
+
+Goodreads has no feeds any more, so both shelves come from its public custom widget,
+`https://www.goodreads.com/review/custom_widget/<user id>?shelf=<shelf>&num_books=<n>&sort=<key>&order=d`.
+The response is JavaScript holding the shelf as one escaped HTML string. `source.html`
+decodes it, adds a `widget_id` made of the source key and the hour (Goodreads caches the
+output per id), and treats a response without that string as a failed source.
+`normalise.html` reads each book's title, review link, author, cover and the reader's own
+star rating. The shelf and the profile must stay public. Reasoning:
+[decisions](docs/decisions.md#goodreads-shelves-come-from-the-public-widget-2026-11-18).
+
+- **No dates.** The widget doesn't carry them. The order comes from `sort` (`date_read`
+  for the read shelf), the channels cards never showed a date, and the signal preset
+  leaves a book row's date cell empty.
+- **Covers** are requested as a 272px-wide rendition (`._SX272_` in place of the
+  thumbnail's size suffix), not the original, which can run to megabytes or be a PNG
+  served as `image/jpeg`.
 
 ### Spans
 

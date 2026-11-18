@@ -32,7 +32,7 @@
         <a class="grid min-w-0 grid-cols-[clamp(96px,8vw,132px)_1fr_auto] items-baseline gap-loose border-t border-line px-loose py-snug text-ink no-underline hover:bg-tint/(--tint-alpha)"
            data-row target="_blank" rel="noopener"
            href="{{ with .permalink }}{{ . }}{{ else }}{{ .url }}{{ end }}">
-          <span class="text-meta text-dim">{{ .date.Format "2006-01-02" }}</span>
+          <span class="text-meta text-dim">{{ with .date }}{{ .Format "2006-01-02" }}{{ end }}</span>
           {{/* Title and second line stack, because they compete for the same
                space otherwise: on one line the title truncates first and eats
                the domain, which is the half that says where the row leads.

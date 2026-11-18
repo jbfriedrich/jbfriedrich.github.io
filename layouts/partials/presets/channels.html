@@ -110,7 +110,7 @@
                   <a class="font-bold text-hue no-underline hover:underline" data-item-host
                      href="{{ $item.url }}" target="_blank" rel="noopener">{{ . }}</a>
                 {{ end }}
-                <span>{{ .date.Format "2 Jan 2006" }}</span>
+                {{ with .date }}<span>{{ .Format "2 Jan 2006" }}</span>{{ end }}
                 {{ with .tags }}<span>{{ delimit (first 2 .) " · " }}</span>{{ end }}
               </p>
             </div>

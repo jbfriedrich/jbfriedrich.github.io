@@ -25,8 +25,9 @@
 {{- if not $raw -}}
   {{- warnf "friedrich: source %q item %q has no date; skipping" $src $title -}}
 {{- else -}}
-  {{/* some feeds (Goodreads) give a single-digit day with no leading zero
-       ("Wed, 1 Feb 2023 …"), which time.AsTime cannot parse */}}
+  {{/* an RFC 822 date may have a single-digit day with no leading zero
+       ("Wed, 1 Feb 2023 …", as Goodreads' RSS had), which time.AsTime cannot
+       parse */}}
   {{- $padded := replaceRE `^([A-Za-z]{3}, )(\d)( )` `${1}0${2}${3}` $raw -}}
   {{- with try (time.AsTime $padded) -}}
     {{- with .Err -}}
