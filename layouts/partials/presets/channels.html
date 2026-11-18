@@ -44,7 +44,7 @@
           </p>
         </div>
       {{ else }}
-      <div class="flex flex-1 p-tight {{ if $src.full }}flex-row flex-wrap items-start gap-tight{{ else }}flex-col{{ end }}">
+      <div class="flex flex-1 p-tight {{ if $src.full }}flex-row flex-wrap items-stretch gap-tight{{ else }}flex-col{{ end }}">
         {{ range $item := $r.items }}
           {{ if $item.image }}
             <a class="flex grow basis-50 items-start gap-snug rounded-xl p-snug text-ink no-underline hover:bg-tint/(--tint-alpha)"
@@ -79,18 +79,26 @@
                 <img class="w-17 aspect-[2/3] shrink-0 rounded-sm object-cover"
                      data-book-cover src="{{ . }}" alt="" width="68" height="102">
               {{ end }}
-              <span class="flex min-w-0 flex-col gap-1.25">
-                {{/* Goodreads titles carry the full subtitle ("… : A
-                     Counterintuitive Approach to Living a Good Life"), which is
-                     several lines in a shelf card and drags the whole tile
-                     taller than the row it sits in. */}}
-                <span class="font-semibold">{{ partial "truncate.html" (dict "s" .title "n" 52) }}</span>
+              {{/* The cards of a cover grid stretch to the height of their row,
+                   and so does the single card of the currently-reading tile
+                   beside it: title and author at the top, stars at the bottom.
+                   Titles wrap to different lengths, and with cards sized to
+                   their own text the stars of a long title dropped below its
+                   neighbours', the tall card stretched the row, and the unrated
+                   currently-reading book was left above a gap. Now every card
+                   in the row has the same frame whatever the title does. */}}
+              <span class="flex min-w-0 flex-col gap-1.25 self-stretch">
+                {{/* The main title only: Goodreads titles carry the full
+                     subtitle ("… : A Counterintuitive Approach to Living a Good
+                     Life"). At most three lines, cut by the browser at the line
+                     end; the full title is the tooltip. */}}
+                <span class="line-clamp-3 font-semibold" title="{{ .title }}">{{ replaceRE `:\s.*$` "" .title }}</span>
                 <span class="text-meta text-dim">{{ .summary }}</span>
                 {{/* A book on the currently-reading shelf has no rating yet, and
                      Goodreads reports 0 for anything unrated. An empty star row
                      is a gap in the card, not information. */}}
                 {{ with .rating }}
-                  {{ partial "rating.html" (dict "n" .) }}
+                  <span class="mt-auto">{{ partial "rating.html" (dict "n" .) }}</span>
                 {{ end }}
               </span>
             </a>
